@@ -1,6 +1,6 @@
 # Sourcing Copilot
 
-**AI-powered candidate scoring for recruiters — built directly into LinkedIn.**
+**AI-powered candidate sourcing copilot for recruiters — built directly into LinkedIn.**
 
 Score LinkedIn profiles against your Ideal Candidate Profile, draft personalised outreach, and manage candidate shortlists — all from a Chrome side panel without leaving the page.
 
