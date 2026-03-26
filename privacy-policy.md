@@ -88,4 +88,4 @@ If this policy is updated, the "Last updated" date at the top of this document w
 
 ## Contact
 
-For questions about this privacy policy, contact: [your email address]
+For questions about this privacy policy, contact: [nunorecruits@gmail.com]
