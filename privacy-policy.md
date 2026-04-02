@@ -1,6 +1,6 @@
 # Privacy Policy — Sourcing Copilot
 
-**Last updated: March 2026**
+**Last updated: April 2026**
 
 ---
 
@@ -88,4 +88,4 @@ If this policy is updated, the "Last updated" date at the top of this document w
 
 ## Contact
 
-For questions about this privacy policy, contact: [nunorecruits@gmail.com]
+For questions about this privacy policy, contact: nunorecruits@gmail.com
