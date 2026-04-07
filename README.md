@@ -3,7 +3,7 @@
 **AI-assisted profile scoring, shortlist building, company analysis, and outreach. All inside your browser.**
 
 [![Chrome Web Store](https://img.shields.io/badge/Chrome%20Web%20Store-Install-teal)](https://chromewebstore.google.com/detail/ffgaljblcpgcamndlegkbbbebnhkjini)
-![Version](https://img.shields.io/badge/version-3.0.0-blue)
+![Version](https://img.shields.io/badge/version-3.0.1-blue)
 
 ---
 
@@ -49,16 +49,17 @@ Or load unpacked from source — see [Development setup](#development-setup) bel
 5. Add your **Recruiter Details** (role title + hiring company name — required for outreach)
 6. Click **+ New Role** and define your ICP:
    - **Name**: e.g. `Enterprise AE – Acme`
-   - **ICP criteria**: paste your job description or describe what good looks like for this role
-   - **What makes this role compelling**: 2-3 sentences in your own words — used to make outreach paragraph 2 specific and human
-   - **Dimensions**: add weighted scoring dimensions (e.g. SaaS Experience 30%, Outbound Motion 25%)
+   - **ICP criteria**: paste your job description or describe what good looks like
+   - **What makes this role compelling**: 2-3 sentences in your own words — used in outreach paragraph 2
+   - **Direct competitors**: comma-separated list of hiring company competitors
+   - **Dimensions**: add weighted scoring dimensions
 7. Click **Save**
 
 ### 4. Score a profile
 1. Open any LinkedIn profile
 2. Click **Score Full Profile** (Option 1) for a quick assessment from the live page
-3. Or download the LinkedIn PDF and drag it into the **Option 2** drop zone for a complete assessment
-4. Results appear in the **Results** tab with score, tier, dimensions, strengths, gaps, red flags, worth exploring, and recommendation
+3. Or download the LinkedIn PDF and drag it into the **Option 2** drop zone
+4. Results appear in the **Results** tab with score, tier, dimensions, strengths, gaps, worth exploring, and recommendation
 
 ---
 
@@ -87,14 +88,14 @@ The scorecard separates evidence into three clear categories:
 
 After scoring, go to the **Results** tab and scroll to **Draft Outreach**. Select Connection Request or InMail, then click **Generate**.
 
-The message is anchored to the most ICP-relevant evidence identified by the scorecard — not a generic template. It uses your recruiter name, hiring company, tone sample, and role compelling pitch from Settings.
+The message is anchored to the most ICP-relevant evidence identified by the scorecard. It uses your recruiter name, hiring company, tone sample, and role compelling pitch from Settings.
 
 - **Connection request:** target 150–200 characters, max 280
-- **InMail:** target 800–900 characters, max 1,300
+- **InMail:** target 500–800 characters, max 1,300
 
 **Tips for better outreach:**
-- Add a **tone sample** in Settings — paste a short, direct message you've sent before. The extension mirrors your style.
-- Fill in **What makes this role compelling** per role — 2-3 specific sentences about the opportunity. This is the foundation for paragraph 2.
+- Add a **tone sample** in Settings — paste a short, direct message you've sent before
+- Fill in **What makes this role compelling** per role — 2-3 specific sentences about the opportunity
 
 ---
 
@@ -139,41 +140,48 @@ No build step required — pure HTML, CSS and vanilla JS.
 
 ## Changelog
 
+### v3.0.1
+- Scoring model switched to Gemini 2.5 Flash with thinking disabled — better instruction following, deterministic at temperature 0
+- Assessment hallucination fix — five-rule evidence framework: only explicit profile statements and verifiable company context are admissible. Job titles and company names are labels only — never used to infer what a candidate did, achieved, or sold
+- Worth Exploring improved — employer context signals (e.g. company serves FS sector) now consistently flagged here rather than scored as confirmed experience
+- Competitor verification rules — competitors must appear explicitly in the profile before being cited. No longer inferred from competitor list alone
+- Outreach prompt simplified — model receives four inputs only: candidate, role, compelling pitch, anchor note. Eliminates source material for hallucination
+- Outreach sentence 1 standardised — "I noticed your experience at [Company] — reaching out about a [Role title] at [Hiring Company]"
+- Job title extraction from profile text in JavaScript — prevents model from substituting inferred role descriptions
+- AI-assisted assessment note added above scorecard results
+- OpenAI JSON parsing fix — explicit instruction to return raw JSON only
+- Hint text updated for compelling pitch and competitors fields
+- What makes this role compelling moved to role settings (per role, not global)
+- Direct competitors field added per role in Settings
+
 ### v3.0.0
 - Ask tab removed
-- Evidence principle introduced — scoring now separates confirmed evidence, contextual signals, and inference. No conflation of employer industry coverage with candidate expertise
-- New "Worth Exploring" field — contextual signals from employer background flagged separately, never scored as confirmed evidence
-- Two-tier anchor selection for outreach — scoring model identifies the most ICP-relevant employer considering both experience fit and company type. Company analysis results used when available
-- Outreach prompt rewritten — governing principle applied to every sentence: must carry information about the candidate or opportunity, not the recruiter's reaction
-- "What makes this role compelling?" field added per role in Settings — recruiter's own words used as the foundation for outreach paragraph 2
-- Subject line formula fixed — follows [Role title] — [Company signal] format, never references candidate's current employer
-- Dual model split — Gemini 2.5 Flash Lite for scoring (deterministic, strict rule-following), Gemini 2.5 Flash for outreach (reasoning, writing quality)
-- Scoring consistency improved — temperature 0 now reliably deterministic with Flash Lite
-- ICP text cap removed in outreach prompt — full job description reaches the model
-- LinkedIn Recruiter support — name extraction and profile content capture on linkedin.com/talent/profile/ URLs
-- PDF scoring processes full profile text with no character truncation
-- Live LinkedIn scan profile text limit raised to 18,000 characters
-- InMail character limit raised to 1,300 (target 800–900)
-- Tone sample nudge shown after every outreach generation if no tone sample is saved
-- Banned phrase list replaced with principle-based rule covering all variations
+- Evidence principle introduced — confirmed vs contextual vs inferred
+- Worth Exploring field added
+- Two-tier anchor selection for outreach
+- Outreach prompt rewritten with governing principle
+- Subject line formula fixed
+- Dual model split introduced
+- ICP text cap removed in outreach
+- LinkedIn Recruiter support added
+- PDF scoring full text, no truncation
+- InMail character limit raised to 1,300
+- Tone sample nudge added
 - Manifest short description updated
 
 ### v2.9.5
-- InMail character limit increased to 1,100 (target 700–900)
-- Improved outreach structure: clear paragraph format, expanded banned phrases list
-- Scoring prompt: promotion/nested roles calibration rule restored
-- Model constant centralised (Gemini 2.5 Flash)
-- Version consistency fixes
+- InMail character limit increased to 1,100
+- Improved outreach structure
+- Scoring prompt: promotion/nested roles calibration restored
+- Model constant centralised
 
 ### v2.9.2
 - LinkedIn PDF upload scoring
-- Recommended badge on PDF option
-- Separate Gemini/OpenAI API key links in Settings
-- URL normalisation fix for chrome-extension://invalid prefix
+- Separate Gemini/OpenAI API key links
+- URL normalisation fix
 
 ### v2.7.0
-- Full UI redesign — light theme, Plus Jakarta Sans, teal accent
-- Weighted ICP dimensions with custom scoring
-- Outreach quality improvements — tone mirroring, banned phrases, first name only
+- Full UI redesign
+- Weighted ICP dimensions
 - Candidate shortlist with CSV export
 - Company analysis with ICP fit reasoning
