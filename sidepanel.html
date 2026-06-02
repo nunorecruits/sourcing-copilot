@@ -1,0 +1,1544 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sourcing Copilot</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    * , *::before, *::after { font-family: var(--sans) !important; }
+
+    :root {
+      --bg: #f8fafc;
+      --surface: #ffffff;
+      --surface2: #f1f5f9;
+      --surface3: #e8f0ee;
+      --border: #e2e8f0;
+      --border-bright: #cbd5e1;
+
+      --accent: #0d9488;
+      --accent-light: #f0fdfa;
+      --accent-dim: rgba(13,148,136,0.08);
+      --accent-glow: rgba(13,148,136,0.15);
+
+      --text: #0f172a;
+      --text-muted: #475569;
+      --text-dim: #94a3b8;
+
+      --high: #0d9488;
+      --med: #d97706;
+      --low: #dc2626;
+      --high-bg: rgba(13,148,136,0.08);
+      --med-bg: rgba(217,119,6,0.08);
+      --low-bg: rgba(220,38,38,0.08);
+
+      --sans: 'Plus Jakarta Sans', -apple-system, sans-serif;
+      --mono: 'Plus Jakarta Sans', -apple-system, sans-serif;
+      --display: 'Plus Jakarta Sans', sans-serif;
+      --radius: 8px;
+      --shadow-sm: 0 1px 3px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.04);
+      --shadow: 0 4px 6px rgba(0,0,0,0.05), 0 2px 4px rgba(0,0,0,0.04);
+    }
+
+    body {
+      width: 100%; height: 100vh;
+      background: var(--bg);
+      color: var(--text);
+      font-family: var(--sans);
+      font-size: 13px;
+      display: flex; flex-direction: column;
+      overflow: hidden;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    body, button, input, textarea, select, option, label, div, span, p, a, h1, h2, h3, h4, h5, h6, summary, strong {
+      font-family: var(--sans);
+    }
+
+    button, input, textarea, select, option {
+      font: inherit;
+      color: inherit;
+    }
+
+    /* ── HEADER ── */
+    .header {
+      padding: 11px 14px;
+      border-bottom: 1px solid var(--border);
+      background: var(--surface);
+      display: flex; align-items: center; justify-content: space-between;
+      flex-shrink: 0;
+      box-shadow: var(--shadow-sm);
+    }
+    .header-left { display: flex; align-items: center; gap: 9px; }
+
+    .logo {
+      width: 28px; height: 28px;
+      background: var(--accent);
+      border-radius: 8px;
+      display: flex; align-items: center; justify-content: center;
+      box-shadow: 0 2px 8px var(--accent-glow);
+    }
+    .logo::before {
+      content: 'SC';
+      font-family: var(--display);
+      font-size: 9px;
+      font-weight: 800;
+      color: #fff;
+      letter-spacing: 0.5px;
+    }
+
+    .header-title {
+      font-family: var(--display);
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--text);
+      letter-spacing: -0.2px;
+    }
+    .header-title span { color: var(--accent); }
+
+    .header-right { display: flex; align-items: center; gap: 5px; }
+    .btn-icon {
+      width: 28px; height: 28px;
+      border: 1px solid var(--border);
+      background: var(--surface2);
+      border-radius: 6px;
+      cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      color: var(--text-muted); font-size: 12px;
+      transition: all 0.15s;
+    }
+    .btn-icon:hover { border-color: var(--accent); color: var(--accent); background: var(--accent-light); }
+
+    /* ── CANDIDATE BAR ── */
+    .candidate-bar {
+      padding: 8px 14px;
+      background: var(--surface2);
+      border-bottom: 1px solid var(--border);
+      display: flex; align-items: center; justify-content: space-between;
+      flex-shrink: 0; min-height: 36px;
+    }
+    .candidate-name {
+      font-family: var(--display);
+      font-size: 13px; font-weight: 600;
+      color: var(--text);
+    }
+    .candidate-meta { font-size: 11px; color: var(--text-muted); }
+    .auto-badge {
+      font-size: 9px; padding: 2px 8px;
+      background: var(--accent-dim);
+      border: 1px solid rgba(13,148,136,0.25);
+      border-radius: 10px;
+      color: var(--accent); font-weight: 600;
+      letter-spacing: 0.3px;
+    }
+
+    .source-tag-row { margin-top: 4px; }
+    .source-tag {
+      display: inline-block;
+      font-size: 10px;
+      line-height: 1;
+      padding: 3px 7px;
+      background: var(--surface3);
+      border: 1px solid var(--border-bright);
+      border-radius: 999px;
+      color: var(--text-muted);
+      font-weight: 600;
+    }
+    .filter-bar { display: flex; gap: 6px; padding: 8px 14px 0; flex-wrap: wrap; }
+    .filter-pill {
+      font-size: 10px; font-weight: 700; letter-spacing: 0.4px; text-transform: uppercase;
+      padding: 3px 10px; border-radius: 999px; cursor: pointer;
+      border: 1px solid var(--border); color: var(--text-dim); background: var(--surface2);
+      transition: all 0.15s;
+    }
+    .filter-pill.active { background: var(--accent); color: #fff; border-color: var(--accent); }
+    .filter-pill:hover:not(.active) { border-color: var(--accent); color: var(--accent); }
+    }
+
+    /* ── ROLE BAR ── */
+    .role-bar {
+      padding: 5px 14px;
+      background: var(--accent-light);
+      border-bottom: 1px solid rgba(13,148,136,0.15);
+      font-size: 11px; color: var(--accent);
+      font-family: var(--sans);
+      font-weight: 500;
+      display: flex; align-items: center; gap: 6px;
+      flex-shrink: 0;
+    }
+    .role-bar::before { content: '▸ '; }
+    .role-bar.warning {
+      background: var(--low-bg);
+      border-bottom-color: rgba(220,38,38,0.15);
+      color: var(--low);
+    }
+    .role-bar.warning::before { content: '⚠ '; }
+
+    /* ── TABS ── */
+    .tabs {
+      display: flex;
+      border-bottom: 1px solid var(--border);
+      background: var(--surface);
+      flex-shrink: 0;
+    }
+    .tab {
+      flex: 1; padding: 8px 4px;
+      font-size: 10px; font-weight: 600;
+      font-family: var(--sans);
+      color: var(--text-dim);
+      cursor: pointer;
+      border-bottom: 2px solid transparent;
+      margin-bottom: -1px;
+      text-align: center;
+      text-transform: uppercase; letter-spacing: 0.6px;
+      transition: all 0.15s;
+    }
+    .tab.active { color: var(--accent); border-bottom-color: var(--accent); }
+    .tab:hover:not(.active) { color: var(--text-muted); }
+
+    /* ── CONTENT ── */
+    .content { flex: 1; overflow-y: auto; scrollbar-width: thin; scrollbar-color: var(--border) var(--surface2); }
+    .panel { display: none; padding: 14px; }
+    .panel.active { display: block; }
+
+    /* ── BUTTONS ── */
+    .btn-primary {
+      width: 100%; padding: 9px 14px;
+      background: var(--accent);
+      color: #fff;
+      border: none;
+      border-radius: var(--radius);
+      font-size: 12px; font-weight: 600;
+      font-family: var(--sans);
+      cursor: pointer;
+      transition: all 0.15s;
+      display: flex; align-items: center; justify-content: center; gap: 6px;
+      box-shadow: 0 2px 8px var(--accent-glow);
+    }
+    .btn-primary:hover {
+      background: #0f766e;
+      box-shadow: 0 4px 12px var(--accent-glow);
+      transform: translateY(-1px);
+    }
+    .btn-primary:disabled { opacity: 0.45; cursor: not-allowed; box-shadow: none; transform: none; }
+
+    .btn-score {
+      background: var(--surface);
+      color: var(--accent);
+      border: 1.5px solid var(--accent);
+      margin-top: 7px;
+      box-shadow: none;
+    }
+    .btn-score:hover {
+      background: var(--accent-light);
+      box-shadow: 0 2px 8px var(--accent-glow);
+      transform: translateY(-1px);
+    }
+
+    .btn-secondary {
+      width: 100%; padding: 7px 14px;
+      background: var(--surface2);
+      color: var(--text-muted);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      font-size: 11px; font-weight: 500;
+      font-family: var(--sans);
+      cursor: pointer;
+      transition: all 0.15s;
+      margin-top: 6px;
+    }
+    .btn-secondary:hover { border-color: var(--accent); color: var(--accent); background: var(--accent-light); }
+
+    /* ── SECTION LABEL ── */
+    .section-label {
+      font-size: 10px; font-weight: 600;
+      color: var(--text-muted);
+      text-transform: uppercase; letter-spacing: 0.8px;
+      font-family: var(--sans);
+      margin-bottom: 8px; margin-top: 14px;
+      display: flex; align-items: center; gap: 8px;
+    }
+    .section-label::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+
+    /* ── COMPANY TAGS ── */
+    .company-tags { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 10px; }
+    .company-tag {
+      display: flex; align-items: center; gap: 3px;
+      padding: 2px 6px;
+      background: var(--surface3);
+      border: 1px solid var(--border-bright);
+      border-radius: 2px;
+      font-size: 10px; color: var(--text);
+      font-family: var(--mono);
+    }
+    .company-tag .remove { color: var(--text-dim); cursor: pointer; font-size: 12px; transition: color 0.15s; }
+    .company-tag .remove:hover { color: var(--low); }
+
+    /* ── INPUTS ── */
+    .input-row { display: flex; gap: 5px; margin-top: 8px; }
+    .input {
+      flex: 1; padding: 7px 10px;
+      background: var(--surface);
+      border: 1.5px solid var(--border);
+      border-radius: var(--radius);
+      color: var(--text); font-size: 12px;
+      font-family: var(--sans);
+      outline: none; transition: border-color 0.15s, box-shadow 0.15s;
+    }
+    .input:focus { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-dim); }
+    .input::placeholder { color: var(--text-dim); }
+    .btn-add {
+      padding: 7px 12px;
+      background: var(--accent-light);
+      border: 1.5px solid var(--accent);
+      border-radius: var(--radius);
+      color: var(--accent); font-size: 11px; font-weight: 600;
+      font-family: var(--sans);
+      cursor: pointer; white-space: nowrap;
+      transition: all 0.15s;
+    }
+    .btn-add:hover { background: var(--accent); color: #fff; }
+
+    /* ── LOADING ── */
+    .loading-state {
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      padding: 28px 14px; gap: 10px;
+    }
+    .spinner {
+      width: 20px; height: 20px;
+      border: 2px solid var(--border);
+      border-top-color: var(--accent);
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .loading-text { font-size: 12px; color: var(--accent); font-family: var(--sans); font-weight: 600; }
+    .loading-sub { font-size: 11px; color: var(--text-muted); font-family: var(--sans); }
+
+    /* ── EMPTY STATE ── */
+    .empty-state { text-align: center; padding: 28px 14px; }
+    .empty-icon { font-size: 22px; margin-bottom: 8px; opacity: 0.4; }
+    .empty-title { font-family: var(--display); font-size: 13px; font-weight: 700; margin-bottom: 4px; color: var(--text-muted); }
+    .empty-desc { font-size: 11px; color: var(--text-dim); line-height: 1.6; font-family: var(--sans); }
+
+    /* ── RESULT CARDS ── */
+    .results-list { display: flex; flex-direction: column; gap: 8px; padding: 12px 14px; }
+    .result-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 13px 14px;
+      transition: all 0.15s;
+      box-shadow: var(--shadow-sm);
+    }
+    .result-card:hover { border-color: rgba(13,148,136,0.3); box-shadow: var(--shadow); }
+
+    .result-header { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 6px; gap: 7px; }
+    .result-company { font-family: var(--display); font-size: 13px; font-weight: 700; color: var(--text); }
+    .relevance-badge {
+      padding: 3px 9px;
+      border-radius: 12px;
+      font-size: 10px; font-weight: 600;
+      font-family: var(--sans);
+      text-transform: uppercase; letter-spacing: 0.3px;
+      white-space: nowrap; flex-shrink: 0;
+    }
+    .relevance-high { background: #f0fdfa; color: #0d9488; border: 1px solid rgba(13,148,136,0.2); }
+    .relevance-medium { background: #fffbeb; color: #d97706; border: 1px solid rgba(217,119,6,0.2); }
+    .relevance-low { background: #fef2f2; color: #dc2626; border: 1px solid rgba(220,38,38,0.2); }
+    .relevance-unknown { background: var(--surface2); color: var(--text-muted); border: 1px solid var(--border); }
+    .result-summary { font-size: 12px; color: var(--text-muted); line-height: 1.6; font-family: var(--sans); }
+    .result-meta { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 6px; }
+    .meta-chip {
+      padding: 2px 8px;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      font-size: 10px; color: var(--text-muted);
+      font-family: var(--sans);
+      font-weight: 500;
+    }
+    .result-reasoning {
+      margin-top: 8px; padding: 8px 10px;
+      background: var(--surface2);
+      border-radius: 8px;
+      font-size: 12px; color: var(--text-muted);
+      line-height: 1.6; font-family: var(--sans);
+    }
+    .result-reasoning strong { color: var(--text); font-weight: 600; }
+
+    /* ── CANDIDATE SCORE CARD ── */
+    .candidate-card {
+      border-color: rgba(13,148,136,0.3);
+      background: linear-gradient(135deg, var(--accent-light) 0%, var(--surface) 60%);
+    }
+    .candidate-card-header { display: flex; align-items: flex-start; justify-content: space-between; gap: 10px; margin-bottom: 10px; }
+    .candidate-label {
+      font-size: 9px; font-weight: 700;
+      color: var(--accent); letter-spacing: 1px;
+      text-transform: uppercase;
+      font-family: var(--sans);
+      margin-bottom: 3px;
+    }
+    .candidate-headline {
+      font-family: var(--display);
+      font-size: 14px; font-weight: 600;
+      color: var(--text); line-height: 1.4;
+    }
+    .candidate-score-wrap { display: flex; flex-direction: column; align-items: flex-end; gap: 4px; flex-shrink: 0; }
+    .candidate-score {
+      font-family: var(--display);
+      font-size: 30px; font-weight: 800;
+      line-height: 1; letter-spacing: -1.5px;
+    }
+    .score-denom { font-size: 11px; font-weight: 400; opacity: 0.5; }
+
+    .profile-section { margin-top: 8px; }
+    .profile-section-label {
+      font-size: 10px; font-weight: 600;
+      color: var(--text-muted);
+      text-transform: uppercase; letter-spacing: 0.6px;
+      font-family: var(--sans);
+      margin-bottom: 5px;
+    }
+    .profile-list { list-style: none; padding: 0; display: flex; flex-direction: column; gap: 3px; }
+    .profile-list li {
+      font-size: 12px; color: var(--text);
+      padding-left: 16px; position: relative; line-height: 1.6;
+      font-family: var(--sans);
+    }
+    .profile-list li::before { content: '+'; position: absolute; left: 0; color: var(--high); font-weight: 700; }
+    .profile-list.gaps li::before { content: '–'; color: var(--low); }
+    .profile-list.red-flags li::before { content: '!'; color: var(--low); }
+    .red-flag-label { color: var(--low) !important; }
+    .explore-label { color: #7c3aed !important; }
+    .profile-list.explore-list li::before { content: '?'; color: #7c3aed; }
+    .compare-bullet-list.explore-list li::before { content: '?'; color: #7c3aed; }
+
+    /* Dimension bars */
+    .dim-grid { display: flex; flex-direction: column; gap: 5px; }
+    .dim-row { display: flex; align-items: center; gap: 7px; }
+    .dim-label {
+      font-size: 10px; color: var(--text-muted);
+      width: 100px; flex-shrink: 0;
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+      font-family: var(--sans); font-weight: 500;
+    }
+    .dim-bar-wrap {
+      flex: 1;
+      background: var(--surface2);
+      border-radius: 4px; height: 6px;
+      overflow: hidden;
+    }
+    .dim-bar { height: 100%; border-radius: 1px; transition: width 0.5s ease; }
+    .dim-score {
+      font-size: 11px; font-weight: 600;
+      width: 24px; text-align: right; flex-shrink: 0;
+      font-family: var(--sans);
+    }
+    .dim-note {
+      font-size: 10px; color: var(--text-muted);
+      padding-left: 107px; margin-top: -2px; margin-bottom: 2px;
+      line-height: 1.4; font-family: var(--sans);
+    }
+
+    /* Action row */
+    .action-row { display: flex; gap: 6px; margin-top: 10px; flex-wrap: wrap; }
+    .copy-btn {
+      display: flex; align-items: center; gap: 4px;
+      padding: 6px 12px;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      color: var(--text-muted); font-size: 11px;
+      font-family: var(--sans); font-weight: 500;
+      cursor: pointer; transition: all 0.15s;
+      flex: 1; justify-content: center;
+    }
+    .copy-btn:hover { border-color: var(--accent); color: var(--accent); background: var(--accent-light); }
+    .copy-btn.copied { border-color: var(--high); color: var(--high); background: var(--high-bg); }
+    .feedback-chip { background: var(--surface2); border: 1px solid var(--border); border-radius: 12px; color: var(--text-muted); font-size: 11px; font-weight: 500; padding: 4px 10px; cursor: pointer; font-family: var(--sans); transition: all 0.15s; white-space: nowrap; }
+    .feedback-chip:hover { border-color: var(--accent); color: var(--accent); }
+    .feedback-chip.active { border-color: var(--accent); color: var(--accent); background: rgba(108,99,255,0.08); }
+
+    /* ── HISTORY ── */
+    .history-item {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 11px 12px;
+      cursor: pointer;
+      transition: all 0.15s;
+      box-shadow: var(--shadow-sm);
+      margin-bottom: 6px;
+      position: relative;
+    }
+    .history-item::before {
+      content: '';
+      position: absolute; top: 0; left: 0;
+      width: 2px; height: 100%;
+      background: var(--border);
+      border-radius: 4px 0 0 4px;
+    }
+    .history-item:hover { border-color: var(--border-bright); }
+    .history-item:hover::before { background: var(--accent); }
+    .history-header { display: flex; align-items: center; justify-content: space-between; }
+    .history-name { font-family: var(--display); font-size: 12px; font-weight: 600; color: var(--text); }
+    .history-score { font-family: var(--display); font-size: 18px; font-weight: 800; }
+    .history-role { font-size: 10px; color: var(--text-muted); margin-top: 2px; font-family: var(--sans); }
+    .history-headline { font-size: 11px; color: var(--text-muted); margin-top: 4px; line-height: 1.4; font-family: var(--sans); }
+
+    /* ── NOTES ── */
+    .notes-area {
+      width: 100%; padding: 8px 10px;
+      background: var(--surface);
+      border: 1.5px solid var(--border);
+      border-radius: var(--radius);
+      color: var(--text); font-size: 12px;
+      font-family: var(--sans);
+      outline: none; resize: vertical; min-height: 65px;
+      line-height: 1.55; transition: all 0.15s;
+      margin-top: 7px;
+    }
+    .notes-area:focus { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-dim); }
+    .notes-area::placeholder { color: var(--text-dim); }
+
+    /* Mode toggle */
+
+    /* CV input */
+    .notes-saved { font-size: 9px; color: var(--high); text-align: right; margin-top: 2px; min-height: 13px; font-family: var(--mono); }
+
+
+    /* Compare / talent pool */
+    .compare-helper {
+      margin: 8px 0 10px;
+      padding: 10px 12px;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+    }
+    .compare-helper-title {
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--text);
+      margin-bottom: 3px;
+    }
+    .compare-helper-text {
+      font-size: 11px;
+      color: var(--text-muted);
+      line-height: 1.5;
+    }
+    .compare-toolbar { display:flex; gap:6px; flex-wrap:wrap; margin-bottom:10px; }
+    .compare-role-group { margin-bottom: 14px; }
+    .compare-role-header { display:flex; align-items:center; justify-content:space-between; gap:8px; margin-bottom:8px; }
+    .compare-role-title { font-size:12px; font-weight:700; color:var(--text); }
+    .compare-role-meta { font-size:10px; color:var(--text-muted); margin-top:2px; }
+    .compare-list { display:flex; flex-direction:column; gap:6px; }
+    .compare-item { background: var(--surface); border:1px solid var(--border); border-radius:10px; box-shadow: var(--shadow-sm); overflow:hidden; }
+    .compare-toggle { width:100%; list-style:none; cursor:pointer; display:flex; align-items:center; justify-content:space-between; gap:10px; padding:10px; }
+    .compare-toggle::-webkit-details-marker { display:none; }
+    .compare-toggle::marker { content:''; }
+    .compare-toggle-left { min-width:0; flex:1; display:flex; align-items:center; gap:8px; }
+    .compare-rank { font-size:10px; font-weight:700; color:var(--text-dim); min-width:24px; }
+    .compare-item-name { font-size:12px; font-weight:600; color:var(--text); }
+    .compare-item-name a { color:inherit; text-decoration:none; }
+    .compare-item-name a:hover { color:var(--accent); }
+    .compare-item-meta { font-size:10px; color:var(--text-muted); margin-top:2px; }
+    .compare-toggle-right { display:flex; align-items:center; gap:8px; flex-shrink:0; }
+    .compare-caret { font-size:11px; color:var(--text-dim); transition: transform 0.15s ease, color 0.15s ease; }
+    .compare-item[open] .compare-caret { transform: rotate(180deg); color:var(--accent); }
+    .compare-item-body { border-top:1px solid var(--border); padding:10px; background:rgba(255,255,255,0.55); }
+    .compare-item-headline { font-size:11px; color:var(--text); margin-top:0; line-height:1.45; }
+    .compare-item-grid { display:grid; grid-template-columns: 1fr 1fr; gap:6px; margin-top:8px; }
+    .compare-mini-card { background: var(--surface2); border:1px solid var(--border); border-radius:8px; padding:7px 8px; }
+    .compare-mini-label { font-size:9px; color:var(--text-muted); text-transform:uppercase; letter-spacing:0.5px; margin-bottom:3px; }
+    .compare-mini-text { font-size:11px; color:var(--text); line-height:1.45; white-space:pre-wrap; }
+    .compare-dim-list { display:flex; flex-direction:column; gap:4px; }
+    .compare-dim-row { display:flex; justify-content:space-between; gap:8px; font-size:10px; }
+
+    /* ── SETTINGS ── */
+    .settings-group { margin-bottom: 14px; }
+    .settings-label {
+      font-size: 10px; font-weight: 600;
+      color: var(--text-muted);
+      text-transform: uppercase; letter-spacing: 0.6px;
+      font-family: var(--sans); margin-bottom: 6px;
+    }
+    .settings-input {
+      width: 100%; padding: 7px 10px;
+      background: var(--surface);
+      border: 1.5px solid var(--border);
+      border-radius: var(--radius);
+      color: var(--text); font-size: 12px;
+      font-family: var(--sans);
+      outline: none; transition: all 0.15s;
+    }
+    .settings-input:focus { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-dim); }
+    .settings-input::placeholder { color: var(--text-dim); }
+    textarea.settings-input { resize: vertical; min-height: 70px; line-height: 1.55; }
+    select.settings-input { cursor: pointer; background: var(--surface); }
+    .gen-dim-btn {
+      width: 100%; margin-top: 6px; padding: 6px; font-size: 10px;
+      font-family: var(--mono); background: var(--surf2); color: var(--accent);
+      border: 1px dashed var(--accent); border-radius: 4px; cursor: pointer;
+      letter-spacing: 0.4px; transition: background 0.15s;
+    }
+    .gen-dim-btn:hover { background: var(--surf3); }
+    .gen-dim-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+    .dim-editor-row {
+      display: grid; grid-template-columns: 1fr 52px; gap: 6px;
+      align-items: start; margin-bottom: 8px; background: var(--surf2);
+      border: 1px solid var(--border); border-radius: 4px; padding: 8px;
+    }
+    .dim-editor-label { font-size: 10px; font-family: var(--mono); color: var(--text-dim); margin-bottom: 3px; }
+    .dim-editor-name { width: 100%; background: var(--surf3); border: 1px solid var(--border); color: var(--text); font-size: 10px; padding: 4px 6px; border-radius: 3px; font-family: var(--mono); box-sizing: border-box; }
+    .dim-editor-desc { width: 100%; background: var(--surf3); border: 1px solid var(--border); color: var(--text-muted); font-size: 9px; padding: 4px 6px; border-radius: 3px; font-family: var(--mono); box-sizing: border-box; margin-top: 4px; resize: none; height: 40px; }
+    .dim-weight-wrap { display: flex; flex-direction: column; align-items: center; gap: 4px; }
+    .dim-weight-input { width: 48px; background: var(--surf3); border: 1px solid var(--accent); color: var(--accent); font-size: 13px; font-weight: 700; font-family: var(--mono); text-align: center; padding: 4px 2px; border-radius: 3px; }
+    .dim-weight-label { font-size: 8px; color: var(--text-dim); font-family: var(--mono); }
+    .weight-ok { color: var(--accent); }
+    .weight-err { color: #ff6b6b; }
+
+    .ctype-label {
+      display: flex; align-items: center; gap: 4px;
+      font-size: 10px; font-family: var(--mono); color: var(--text-muted);
+      background: var(--surf2); border: 1px solid var(--border);
+      padding: 3px 8px; border-radius: 3px; cursor: pointer;
+      transition: border-color 0.15s, color 0.15s;
+    }
+    .ctype-label:has(input:checked) { border-color: var(--accent); color: var(--accent); }
+    .ctype-label input { display: none; }
+
+    .role-item {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 7px 9px;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      cursor: pointer; transition: all 0.15s;
+      margin-bottom: 4px;
+    }
+    .role-item.selected {
+      border-color: rgba(13,148,136,0.3);
+      background: var(--accent-light);
+    }
+    .role-item-name { font-size: 12px; font-weight: 600; color: var(--text); font-family: var(--sans); }
+    .role-item-actions { display: flex; gap: 8px; align-items: center; }
+    .role-selected-indicator {
+      font-size: 10px; color: var(--accent); font-weight: 600;
+      font-family: var(--sans); text-transform: uppercase; letter-spacing: 0.3px;
+    }
+    .role-edit { color: var(--text-dim); cursor: pointer; font-size: 12px; transition: color 0.15s; }
+    .role-edit:hover { color: var(--accent); }
+    .role-delete { color: var(--text-dim); cursor: pointer; font-size: 14px; transition: color 0.15s; }
+    .role-delete:hover { color: var(--low); }
+
+    .add-role-form {
+      background: var(--surface2);
+      border: 1.5px solid var(--border);
+      border-radius: 10px;
+      padding: 12px; margin-top: 8px;
+    }
+    .save-btn {
+      width: 100%; padding: 9px;
+      background: var(--accent); color: #fff;
+      border: none; border-radius: var(--radius);
+      font-size: 12px; font-weight: 600;
+      font-family: var(--sans);
+      cursor: pointer; transition: all 0.15s;
+      margin-top: 6px;
+      box-shadow: 0 2px 8px var(--accent-glow);
+    }
+    .save-btn:hover { background: #0f766e; transform: translateY(-1px); }
+    .status-msg {
+      font-size: 11px; color: var(--high);
+      text-align: center; margin-top: 5px; min-height: 14px;
+      font-family: var(--sans); font-weight: 500;
+    }
+    .divider { height: 1px; background: var(--border); margin: 12px 0; }
+    .error-msg {
+      font-size: 11px; color: var(--low);
+      padding: 7px 10px;
+      background: #fef2f2;
+      border: 1px solid rgba(220,38,38,0.2);
+      border-radius: var(--radius);
+      margin-top: 7px; line-height: 1.5;
+      font-family: var(--mono);
+    }
+
+
+    /* Score info button & explanation */
+    .score-info-btn {
+      width: 18px; height: 18px;
+      border: 1.5px solid var(--border);
+      border-radius: 50%;
+      font-size: 10px; font-weight: 600;
+      color: var(--text-dim);
+      display: flex; align-items: center; justify-content: center;
+      cursor: pointer; transition: all 0.15s;
+      font-family: var(--sans);
+      align-self: flex-end; margin-left: auto;
+    }
+    .score-info-btn:hover, .score-info-btn.active {
+      border-color: var(--accent);
+      color: var(--accent);
+      background: var(--accent-light);
+    }
+    .score-explanation {
+      margin: 10px 0;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      overflow: hidden;
+    }
+    .score-exp-title {
+      font-size: 10px; font-weight: 600;
+      color: var(--accent);
+      text-transform: uppercase; letter-spacing: 0.6px;
+      font-family: var(--sans);
+      padding: 8px 12px 6px;
+      border-bottom: 1px solid var(--border);
+    }
+    .score-exp-body { padding: 10px 12px; display: flex; flex-direction: column; gap: 6px; }
+    .score-exp-row { display: flex; align-items: baseline; gap: 8px; }
+    .score-exp-range {
+      font-family: var(--display);
+      font-size: 11px; font-weight: 700;
+      width: 44px; flex-shrink: 0;
+    }
+    .score-exp-label {
+      font-size: 11px; color: var(--text-muted);
+      font-family: var(--sans); line-height: 1.4;
+    }
+    .score-exp-divider { height: 1px; background: var(--border); margin: 3px 0; }
+    .score-exp-note {
+      font-size: 11px; color: var(--text-muted);
+      font-family: var(--sans); line-height: 1.5;
+    }
+
+
+    /* Score tier colours */
+    .score-tier-high { color: #0d9488; }
+    .score-tier-med  { color: #d97706; }
+    .score-tier-low  { color: #dc2626; }
+
+    /* Dim bar tier fills */
+    .dim-bar-high { background: #0d9488; }
+    .dim-bar-med  { background: #d97706; }
+    .dim-bar-low  { background: #dc2626; }
+
+    /* Layout helpers */
+    .flex-fill { flex: 1; }
+    .history-score-wrap { display: flex; align-items: center; gap: 6px; }
+    .company-section-label { padding: 0 0 4px 0; }
+
+    .btn-danger {
+      display: inline-flex; align-items: center; justify-content: center; gap: 6px;
+      background: rgba(220,38,38,0.08);
+      color: #b91c1c;
+      border: 1px solid rgba(220,38,38,0.22);
+      border-radius: 8px;
+      padding: 6px 10px;
+      font-size: 10px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.15s ease;
+    }
+    .btn-danger:hover { background: rgba(220,38,38,0.14); border-color: rgba(220,38,38,0.35); }
+    .btn-danger:focus-visible { outline: 2px solid rgba(220,38,38,0.25); outline-offset: 2px; }
+
+    .compare-helper {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 12px;
+      margin-bottom: 12px;
+      box-shadow: var(--shadow-sm);
+    }
+    .compare-helper-title { font-size: 11px; font-weight: 700; color: var(--text); margin-bottom: 4px; }
+    .compare-helper-text { font-size: 11px; color: var(--text-muted); line-height: 1.6; }
+    .compare-toolbar { display:flex; gap:8px; margin-bottom: 12px; }
+    .compare-role-group, .compare-item {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      box-shadow: var(--shadow-sm);
+    }
+    .compare-role-group { margin-bottom: 12px; overflow: hidden; }
+    .compare-role-group > summary, .compare-item > summary { list-style: none; cursor: pointer; }
+    .compare-role-group > summary::-webkit-details-marker, .compare-item > summary::-webkit-details-marker { display: none; }
+    .compare-role-header { display:flex; align-items:flex-start; justify-content:space-between; gap:10px; padding:12px; }
+    .compare-role-header-main { flex:1; min-width:0; }
+    .compare-role-title-row, .compare-item-title-row { display:flex; align-items:center; justify-content:space-between; gap:10px; }
+    .compare-role-title { font-size: 13px; font-weight: 700; color: var(--text); }
+    .compare-role-meta { font-size: 10px; color: var(--text-muted); margin-top: 4px; }
+    .compare-role-inline-actions, .compare-item-inline-actions { display:flex; align-items:center; gap:8px; margin-top: 8px; flex-wrap:wrap; }
+    .compare-list { padding: 0 12px 12px; display:flex; flex-direction:column; gap:10px; }
+    .compare-inline-actions { display:flex; gap:8px; margin-bottom: 2px; flex-wrap:wrap; }
+    .compare-item { overflow: hidden; }
+    .compare-toggle { display:flex; align-items:flex-start; justify-content:space-between; gap:10px; padding:12px; }
+    .compare-toggle-left { display:flex; gap:10px; min-width:0; flex:1; }
+    .compare-rank { min-width:28px; height:28px; border-radius:999px; background: var(--accent-light); color: var(--accent); display:flex; align-items:center; justify-content:center; font-size: 10px; font-weight: 800; }
+    .compare-item-name { font-size: 12px; font-weight: 700; color: var(--text); }
+    .compare-item-name a { color: inherit; text-decoration: none; }
+    .compare-item-name a:hover { text-decoration: underline; }
+    .compare-item-meta { font-size: 10px; color: var(--text-muted); margin-top: 4px; }
+    .compare-toggle-right, .compare-role-header-actions { display:flex; align-items:center; gap:8px; }
+    .compare-caret { color: var(--text-dim); font-size: 12px; transition: transform 0.15s ease; }
+    details[open] > summary .compare-caret { transform: rotate(180deg); }
+    .compare-item-body { padding: 0 12px 12px; }
+    .compare-item-headline { font-size: 11px; color: var(--text-muted); line-height: 1.5; margin-bottom: 10px; }
+    .compare-item-grid { display:grid; grid-template-columns: 1fr 1fr; gap:8px; }
+    .compare-mini-card { background: var(--surface2); border: 1px solid var(--border); border-radius: 10px; padding: 10px; }
+    .compare-mini-label { font-size: 10px; font-weight: 700; color: var(--text); margin-bottom: 6px; }
+    .compare-mini-text { font-size: 10px; color: var(--text-muted); line-height: 1.5; white-space: pre-wrap; }
+    .compare-dim-list { display:flex; flex-direction:column; gap:6px; }
+    .compare-dim-row { display:flex; align-items:center; justify-content:space-between; gap:8px; font-size:10px; color: var(--text-muted); }
+    .compare-actions { margin-top: 10px; display:flex; justify-content:flex-start; }
+
+    .confirm-overlay {
+      position: fixed; inset: 0; background: rgba(15,23,42,0.42);
+      display: none; align-items: center; justify-content: center; z-index: 9999; padding: 16px;
+    }
+    .confirm-overlay.show { display: flex; }
+    .confirm-dialog {
+      width: 100%; max-width: 320px; background: var(--surface); border: 1px solid var(--border);
+      border-radius: 14px; box-shadow: 0 18px 40px rgba(15,23,42,0.18); padding: 16px;
+    }
+    .confirm-title { font-size: 14px; font-weight: 700; color: var(--text); margin-bottom: 8px; }
+    .confirm-text { font-size: 11px; color: var(--text-muted); line-height: 1.6; }
+    .confirm-actions { display:flex; gap:8px; margin-top: 14px; }
+    .confirm-actions .btn-secondary, .confirm-actions .btn-danger { width: 100%; margin-top: 0; justify-content: center; }
+    .no-roles-msg { font-size: 12px; color: var(--text-muted); padding: 4px 0; font-family: var(--sans); }
+
+    /* Link hover states — no inline JS handlers (CSP compliance) */
+    .link-hover-accent {
+      color: var(--accent);
+      text-decoration: none;
+      transition: color 0.15s;
+    }
+    .link-hover-accent:hover { text-decoration: underline; }
+    .link-hover-underline-accent {
+      color: var(--accent);
+      text-decoration: none;
+      transition: text-decoration 0.15s;
+    }
+    .link-hover-underline-accent:hover { text-decoration: underline; }
+    .link-arrow { font-size: 9px; opacity: 0.5; }
+
+
+    .compare-role-group, .compare-item {
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      background: var(--surface);
+      margin-bottom: 10px;
+      overflow: hidden;
+    }
+    .compare-role-toggle, .compare-toggle {
+      list-style: none;
+      cursor: pointer;
+    }
+    .compare-role-toggle::-webkit-details-marker, .compare-toggle::-webkit-details-marker { display: none; }
+    .compare-role-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      padding: 10px 12px;
+      background: var(--surface);
+    }
+    .compare-role-header-actions, .compare-actions {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      flex-wrap: wrap;
+    }
+    .compare-role-header-main {
+      flex: 1;
+      min-width: 0;
+    }
+    .compare-role-title { font-size: 12px; font-weight: 700; color: var(--text); }
+    .compare-role-meta, .compare-item-meta { font-size: 10px; color: var(--text-dim); }
+    .compare-list { padding: 0 10px 10px; }
+    .compare-toggle {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 12px;
+      background: var(--surface2);
+    }
+    .compare-toggle-left, .compare-toggle-right {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .compare-rank {
+      min-width: 28px;
+      font-size: 10px;
+      color: var(--text-dim);
+      font-family: var(--mono);
+    }
+    .compare-item-name { font-size: 12px; font-weight: 600; color: var(--text); }
+    .compare-item-name a { color: var(--accent); text-decoration: none; }
+    .compare-item-name a:hover { text-decoration: underline; }
+    .compare-caret { font-size: 12px; color: var(--text-dim); }
+    .compare-item-body { padding: 10px 12px 12px; }
+    .compare-inline-actions {
+      display: flex;
+      justify-content: flex-end;
+      gap: 6px;
+      margin-top: 10px;
+      padding-top: 10px;
+      border-top: 1px solid var(--border);
+    }
+    .compare-item-headline { font-size: 11px; color: var(--text-muted); margin-bottom: 8px; line-height: 1.5; }
+    .compare-item-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 8px;
+    }
+    .compare-mini-card {
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 8px 10px;
+    }
+    .compare-mini-label {
+      font-size: 9px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.6px;
+      color: var(--text-dim);
+      margin-bottom: 4px;
+    }
+    .compare-mini-text { font-size: 11px; color: var(--text-muted); line-height: 1.5; white-space: pre-wrap; }
+    .compare-dim-list { display: flex; flex-direction: column; gap: 4px; }
+    .compare-dim-row { display: flex; justify-content: space-between; align-items: center; gap: 8px; font-size: 11px; color: var(--text-muted); }
+    .compare-dim-label { flex: 1; }
+    .compare-dim-score { font-size: 12px; flex-shrink: 0; }
+    .compare-dim-denom { font-size: 9px; font-weight: 400; opacity: 0.6; }
+    .compare-dim-note-wrap { margin: 2px 0 4px 0; }
+    .compare-dim-note-toggle { font-size: 10px; color: var(--accent); cursor: pointer; list-style: none; display: inline-block; }
+    .compare-dim-note-toggle::-webkit-details-marker { display: none; }
+    .compare-dim-note-toggle::before { content: '+ '; }
+    details[open] .compare-dim-note-toggle::before { content: '− '; }
+    .compare-dim-note { font-size: 10px; color: var(--text-muted); line-height: 1.5; padding: 4px 8px; background: var(--surface2); border-radius: 6px; margin-top: 3px; }
+    .compare-bullet-list { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 4px; }
+    .compare-bullet-list li { font-size: 11px; color: var(--text-muted); padding-left: 14px; position: relative; line-height: 1.5; }
+    .compare-bullet-list li::before { content: '+'; position: absolute; left: 0; color: var(--high); font-weight: 700; }
+    .compare-bullet-list.gaps li::before { content: '–'; color: var(--med); }
+    .compare-bullet-list.red-flags li::before { content: '!'; color: var(--low); }
+    .compare-bullet-empty { color: var(--text-dim) !important; font-style: italic; }
+    .compare-bullet-empty::before { content: '' !important; }
+    .compare-red-flag-label { color: var(--low) !important; }
+
+
+    .confirm-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(15, 23, 42, 0.42);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 16px;
+      z-index: 9999;
+    }
+    .confirm-overlay.show { display: flex; }
+    .confirm-dialog {
+      width: 100%;
+      max-width: 320px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      box-shadow: var(--shadow);
+      padding: 14px;
+    }
+    .confirm-title {
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--text);
+      margin-bottom: 6px;
+    }
+    .confirm-text {
+      font-size: 12px;
+      color: var(--text-muted);
+      line-height: 1.55;
+    }
+    .confirm-actions {
+      display: flex;
+      justify-content: flex-end;
+      gap: 8px;
+      margin-top: 14px;
+    }
+    .btn-danger {
+      background: #fff1f2;
+      border: 1px solid #fecdd3;
+      color: #be123c;
+    }
+    .btn-danger:hover {
+      border-color: #fb7185;
+      color: #9f1239;
+      background: #ffe4e6;
+    }
+
+    ::-webkit-scrollbar { width: 3px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+
+    .scan-option-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 12px;
+      margin-bottom: 10px;
+      box-shadow: var(--shadow-sm);
+    }
+    .scan-option-head { display:flex; align-items:center; justify-content:space-between; gap:8px; margin-bottom:6px; }
+    .scan-option-title { font-size: 12px; font-weight: 700; color: var(--text); }
+    .scan-inline-badge {
+      font-size: 10px; font-weight: 700; color: var(--accent);
+      background: var(--accent-light); border: 1px solid rgba(13,148,136,0.18);
+      border-radius: 999px; padding: 3px 8px; white-space: nowrap;
+    }
+    .scan-option-note { font-size: 11px; color: var(--text-muted); line-height: 1.45; margin-top: 2px; }
+    .scan-option-list { margin: 8px 0 0 18px; color: var(--text-muted); }
+    .scan-option-list li { font-size: 11px; line-height: 1.5; margin-bottom: 4px; }
+    .scan-option-actions { margin-top: 10px; }
+    .scan-option-list { display:none; }
+    .pdf-dropzone {
+      margin-top: 10px; border: 1.5px dashed var(--accent); border-radius: 10px;
+      background: var(--accent-light); padding: 14px 12px; text-align: center; cursor: pointer;
+      transition: all 0.15s ease;
+    }
+    .pdf-dropzone:hover, .pdf-dropzone.dragover { background: #e6fffb; border-color: #0f766e; }
+    .pdf-dropzone-title { font-size: 12px; font-weight: 700; color: var(--text); }
+    .pdf-dropzone-sub { font-size: 11px; color: var(--text-muted); margin-top: 4px; }
+    .pdf-file-name { font-size: 11px; color: var(--accent); margin-top: 8px; font-weight: 600; word-break: break-word; }
+    .jd-dropzone {
+      border: 1.5px dashed var(--border-bright); border-radius: 8px;
+      background: var(--surface2); padding: 10px 12px; text-align: center; cursor: pointer;
+      transition: all 0.15s ease;
+    }
+    .jd-dropzone:hover, .jd-dropzone.dragover { background: var(--accent-light); border-color: var(--accent); }
+    .jd-dropzone-title { font-size: 11px; font-weight: 700; color: var(--text); }
+    .jd-dropzone-sub { font-size: 10px; color: var(--text-dim); margin-top: 3px; }
+
+    /* ── GITHUB TAB ── */
+    .github-header { margin-bottom: 14px; }
+    .github-candidate-name { font-size: 14px; font-weight: 700; color: var(--text); }
+    .github-candidate-meta { font-size: 11px; color: var(--text-dim); margin-top: 2px; }
+    .github-tier-badge {
+      display: inline-block; margin-top: 6px;
+      padding: 2px 8px; border-radius: 10px;
+      font-size: 10px; font-weight: 700; letter-spacing: 0.4px; text-transform: uppercase;
+    }
+    .github-tier-badge.established { background: #1a3a2a; color: #4ade80; }
+    .github-tier-badge.active { background: #1a2e3a; color: #60a5fa; }
+    .github-tier-badge.passive { background: #2a2a1a; color: #facc15; }
+    .github-tier-badge.new { background: #2a1a2a; color: #c084fc; }
+    .github-section { margin-bottom: 16px; }
+    .github-contact-grid { display: flex; flex-direction: column; gap: 4px; }
+    .github-contact-row { display: flex; gap: 6px; font-size: 11px; color: var(--text-muted); align-items: baseline; }
+    .github-contact-label { font-weight: 600; color: var(--text-dim); min-width: 64px; font-size: 10px; text-transform: uppercase; letter-spacing: 0.4px; }
+    .github-contact-value a { color: var(--accent); text-decoration: none; }
+    .github-contact-value a:hover { text-decoration: underline; }
+    .github-lang-bars { display: flex; flex-direction: column; gap: 6px; }
+    .github-lang-row { display: flex; align-items: center; gap: 8px; }
+    .github-lang-name { font-size: 11px; font-weight: 600; color: var(--text-muted); min-width: 80px; }
+    .github-lang-bar-wrap { flex: 1; background: var(--border); border-radius: 3px; height: 6px; overflow: hidden; }
+    .github-lang-bar { height: 100%; border-radius: 3px; background: var(--accent); transition: width 0.4s ease; }
+    .github-lang-pct { font-size: 10px; color: var(--text-dim); min-width: 32px; text-align: right; }
+    .github-project-card {
+      background: var(--surface2); border: 1px solid var(--border);
+      border-radius: 6px; padding: 10px 12px; margin-bottom: 8px;
+    }
+    .github-project-name { font-size: 12px; font-weight: 700; color: var(--accent); }
+    .github-project-desc { font-size: 11px; color: var(--text-muted); margin-top: 3px; line-height: 1.4; }
+    .github-project-meta { display: flex; gap: 10px; margin-top: 6px; font-size: 10px; color: var(--text-dim); }
+    .github-summary-text { font-size: 12px; color: var(--text-muted); line-height: 1.6; }
+    .github-outreach-box {
+      background: var(--surface2); border-left: 3px solid var(--accent);
+      padding: 10px 12px; border-radius: 0 6px 6px 0;
+      font-size: 12px; color: var(--text-muted); line-height: 1.6; font-style: italic;
+    }
+    .github-fit-tier {
+      display: inline-block; margin-bottom: 8px;
+      padding: 3px 10px; border-radius: 999px;
+      font-size: 11px; font-weight: 700; letter-spacing: 0.3px;
+    }
+    .github-fit-tier.strong { background: #1a3a2a; color: #4ade80; }
+    .github-fit-tier.partial { background: #2a2a1a; color: #facc15; }
+    .github-fit-tier.weak { background: #2a1a1a; color: #f87171; }
+    .github-fit-reasons { display: flex; flex-direction: column; gap: 5px; margin-bottom: 8px; }
+    .github-fit-reason { font-size: 11px; color: var(--text-muted); line-height: 1.5; padding-left: 10px; position: relative; }
+    .github-fit-reason::before { content: '·'; position: absolute; left: 0; color: var(--accent); font-weight: 700; }
+    .github-fit-caveat {
+      font-size: 10px; color: var(--text-dim); line-height: 1.5;
+      padding: 6px 8px; background: var(--surface2); border-radius: 4px;
+      border-left: 2px solid var(--border-bright);
+    }
+    .github-section-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 6px; }
+    .github-section-header .section-label { margin-bottom: 0; }
+    .github-copy-btn {
+      font-size: 10px; font-weight: 600; color: var(--text-dim);
+      background: var(--surface2); border: 1px solid var(--border);
+      border-radius: 4px; padding: 2px 7px; cursor: pointer;
+      letter-spacing: 0.3px; transition: all 0.15s; white-space: nowrap;
+    }
+    .github-copy-btn:hover { color: var(--accent); border-color: var(--accent); }
+    .github-copy-btn.copied { color: #4ade80; border-color: #4ade80; }
+    .github-copy-all-btn {
+      width: 100%; padding: 8px; margin-top: 4px;
+      background: var(--surface2); border: 1px solid var(--border);
+      border-radius: 6px; font-size: 11px; font-weight: 600;
+      color: var(--text-muted); cursor: pointer; transition: all 0.15s;
+      letter-spacing: 0.3px;
+    }
+    .github-copy-all-btn:hover { border-color: var(--accent); color: var(--accent); }
+  </style>
+</head>
+<body>
+
+  <div class="header">
+    <div class="header-left">
+      <div class="logo"></div>
+      <span class="header-title">Sourcing <span>Copilot</span></span>
+    </div>
+    <div class="header-right">
+      <button class="btn-icon" id="refreshBtn" title="Re-scan current page">&#8635;</button>
+      <button class="btn-icon" id="settingsTabBtn" title="Settings">⚙</button>
+    </div>
+  </div>
+
+  <div class="candidate-bar">
+    <div>
+      <div class="candidate-name" id="candidateName">No profile loaded</div>
+      <div class="candidate-meta" id="candidateMeta">Open a LinkedIn profile to begin</div>
+    </div>
+    <span class="auto-badge" id="autoBadge" style="display:none;">AUTO</span>
+  </div>
+
+  <div class="role-bar warning" id="roleBar">No active role — go to Settings</div>
+
+  <div class="tabs">
+    <div class="tab active" data-tab="scan">Scan</div>
+    <div class="tab" data-tab="github">GitHub</div>
+    <div class="tab" data-tab="results">Results <span id="resultsCount"></span></div>
+    <div class="tab" data-tab="history">History</div>
+    <div class="tab" data-tab="compare">Shortlist</div>
+    <div class="tab" data-tab="settings">Settings</div>
+  </div>
+
+  <div class="content">
+
+    <!-- SCAN -->
+    <div class="panel active" id="panel-scan">
+
+      <!-- LinkedIn mode -->
+      <div id="linkedinMode">
+        <div class="scan-option-card">
+          <div class="scan-option-head">
+            <div class="scan-option-title">Option 1 · Live LinkedIn scan</div>
+            <div class="scan-inline-badge">Fastest</div>
+          </div>
+          <div class="scan-option-note">Quick score from the live page. Assessment may be limited to the profile content visible on screen at one time.</div>
+          <div class="scan-option-actions">
+            <button class="btn-primary" id="scoreProfileBtn">▸ Score Full Profile</button>
+            <button class="btn-primary btn-score" id="scanBtn">◎ Scan Companies</button>
+          </div>
+        </div>
+
+        <div class="scan-option-card">
+          <div class="scan-option-head">
+            <div class="scan-option-title">Option 2 · Upload LinkedIn PDF</div>
+            <div class="scan-inline-badge">Recommended</div>
+          </div>
+          <div class="scan-option-note">More complete assessment from a LinkedIn profile PDF export. Captures fuller work history for scoring and company analysis. Works with OpenAI and Gemini.</div>
+          <div class="scan-option-actions">
+            <div class="pdf-dropzone" id="pdfDropzone" tabindex="0" role="button" aria-label="Drop LinkedIn PDF here or click to upload">
+              <div class="pdf-dropzone-title">Drag and drop LinkedIn PDF</div>
+              <div class="pdf-dropzone-sub">or click to choose a file</div>
+            </div>
+            <input type="file" id="pdfInput" accept="application/pdf" style="display:none;" />
+            <div id="pdfFileName" class="pdf-file-name"></div>
+          </div>
+        </div>
+
+        <div id="detectedSection" style="display:none;">
+          <div class="section-label">Detected</div>
+          <div class="company-tags" id="companyTags"></div>
+          <button class="btn-primary" id="analyseBtn" style="margin-top:8px;">⌖ Analyse Companies</button>
+        </div>
+
+        <div class="section-label">Add Manual</div>
+        <div class="input-row">
+          <input type="text" class="input" id="manualInput" placeholder="Salesforce, UiPath..." />
+          <button class="btn-add" id="addManualBtn">Add</button>
+        </div>
+
+        <button class="btn-secondary" id="clearBtn" style="display:none;">Clear All</button>
+        <div id="scanError" class="error-msg" style="display:none;"></div>
+
+        <div class="section-label">Notes</div>
+        <textarea class="notes-area" id="notesArea" placeholder="Your read on this candidate..."></textarea>
+        <div class="notes-saved" id="notesSaved"></div>
+      </div>
+
+
+
+    </div>
+
+    <!-- GITHUB -->
+    <div class="panel" id="panel-github">
+
+      <!-- Permanent scan button -- always visible -->
+      <div style="padding:0 0 10px;">
+        <button class="btn-primary" id="githubScanBtn">⌥ Scan GitHub Profile</button>
+        <div id="githubError" class="error-msg" style="display:none;margin-top:8px;"></div>
+      </div>
+
+      <!-- First-run: no token saved yet -->
+      <div id="githubSetup" style="display:none;">
+        <div style="font-size:13px;font-weight:700;color:var(--text);margin-bottom:6px;">One-time setup</div>
+        <div style="font-size:11px;color:var(--text-muted);line-height:1.6;margin-bottom:12px;">
+          GitHub limits unauthenticated scans to ~2 profiles/hour. A free Personal Access Token removes that cap entirely (5,000/hour).<br><br>
+          Takes 2 minutes. No special permissions needed.
+        </div>
+        <div style="display:flex;flex-direction:column;gap:8px;margin-bottom:12px;">
+          <div style="display:flex;align-items:center;gap:8px;font-size:11px;color:var(--text-muted);">
+            <span style="background:var(--accent);color:#fff;border-radius:50%;width:18px;height:18px;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;flex-shrink:0;">1</span>
+            <span>Click the button below — it opens the GitHub token page directly</span>
+          </div>
+          <div style="display:flex;align-items:center;gap:8px;font-size:11px;color:var(--text-muted);">
+            <span style="background:var(--accent);color:#fff;border-radius:50%;width:18px;height:18px;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;flex-shrink:0;">2</span>
+            <span>Click <strong>Generate new token (classic)</strong> — leave every scope box <strong>unticked</strong>, then click <strong>Generate token</strong></span>
+          </div>
+          <div style="display:flex;align-items:center;gap:8px;font-size:11px;color:var(--text-muted);">
+            <span style="background:var(--accent);color:#fff;border-radius:50%;width:18px;height:18px;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;flex-shrink:0;">3</span>
+            <span>Copy the token shown on screen <strong>(it only appears once)</strong> and paste it below</span>
+          </div>
+        </div>
+        <a href="https://github.com/settings/tokens/new" target="_blank" class="btn-primary" style="display:block;text-align:center;text-decoration:none;margin-bottom:10px;">Open GitHub Token Page ↗</a>
+        <input type="password" class="input" id="githubTokenInput" placeholder="Paste token here (ghp_...)" style="margin-bottom:6px;" />
+        <button class="btn-primary" id="githubTokenSaveBtn">Save &amp; Continue</button>
+        <div style="font-size:9px;color:var(--text-dim);margin-top:6px;">Stored locally in your browser only. Never sent anywhere except GitHub's API.</div>
+        <div id="githubTokenError" class="error-msg" style="display:none;margin-top:6px;"></div>
+      </div>
+
+      <!-- Placeholder: not on a GitHub profile -->
+      <div id="githubPlaceholder" class="empty-state">
+        <div class="empty-icon">⌥</div>
+        <div class="empty-title">No GitHub profile open</div>
+        <div class="empty-desc">Navigate to a GitHub user profile<br>to run a Technical Analysis.</div>
+      </div>
+
+      <!-- Loading state -->
+      <div id="githubLoading" style="display:none;">
+        <div class="loading-state" style="display:flex;">
+          <div class="loading-spinner"></div>
+          <div>
+            <div class="loading-text" id="githubLoadingText">Fetching repos...</div>
+            <div class="loading-company" id="githubLoadingName"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Results card -->
+      <div id="githubResults" style="display:none;">
+
+        <div class="github-header">
+          <div class="github-candidate-name" id="githubCandidateName"></div>
+          <div class="github-candidate-meta" id="githubCandidateMeta"></div>
+          <div id="githubVisibilityTier" class="github-tier-badge"></div>
+        </div>
+
+        <div class="github-section">
+          <div class="github-section-header">
+            <div class="section-label">Contact & Location</div>
+            <button class="github-copy-btn" id="copyContactBtn">Copy</button>
+          </div>
+          <div id="githubContact" class="github-contact-grid"></div>
+        </div>
+
+        <div class="github-section">
+          <div class="github-section-header">
+            <div class="section-label">Languages</div>
+            <button class="github-copy-btn" id="copyLanguagesBtn">Copy</button>
+          </div>
+          <div id="githubLanguages" class="github-lang-bars"></div>
+        </div>
+
+        <div class="github-section">
+          <div class="github-section-header">
+            <div class="section-label">Notable Projects</div>
+            <button class="github-copy-btn" id="copyProjectsBtn">Copy</button>
+          </div>
+          <div id="githubProjects"></div>
+        </div>
+
+        <div class="github-section">
+          <div class="github-section-header">
+            <div class="section-label">Technical Summary</div>
+            <button class="github-copy-btn" id="copySummaryBtn">Copy</button>
+          </div>
+          <div id="githubSummary" class="github-summary-text"></div>
+        </div>
+
+        <div class="github-section">
+          <div class="github-section-header">
+            <div class="section-label">Outreach Hook</div>
+            <button class="github-copy-btn" id="copyHookBtn">Copy</button>
+          </div>
+          <div id="githubOutreachHook" class="github-outreach-box"></div>
+        </div>
+
+        <div class="github-section" id="githubFitSection" style="display:none;">
+          <div class="github-section-header">
+            <div>
+              <div class="section-label">Suitability Fit Signal</div>
+              <div id="githubFitRoleName" style="font-size:10px;color:var(--text-dim);margin-top:1px;"></div>
+            </div>
+            <button class="github-copy-btn" id="copyFitBtn">Copy</button>
+          </div>
+          <div id="githubFitTier" class="github-fit-tier"></div>
+          <div id="githubFitReasons" class="github-fit-reasons"></div>
+          <div class="github-fit-caveat">⚠ Based on public GitHub data only — technical signals only. Career history, domain experience, and soft skills require LinkedIn or interview assessment.</div>
+        </div>
+
+        <div id="githubFitNoRole" style="display:none;padding:8px 0;">
+          <div style="font-size:11px;color:var(--text-dim);font-style:italic;">No active role selected — go to Settings to enable Suitability Fit Signal.</div>
+        </div>
+
+        <button class="github-copy-all-btn" id="copyAllGithubBtn">⎘ Copy All</button>
+        <button class="btn-secondary" id="githubRescanBtn" style="margin-top:8px;">↻ Re-scan Profile</button>
+
+      </div>
+
+    </div>
+
+    <!-- RESULTS -->
+    <div class="panel" id="panel-results">
+      <div id="resultsEmpty" class="empty-state">
+        <div class="empty-icon">◈</div>
+        <div class="empty-title">No results yet</div>
+        <div class="empty-desc">Score the profile or scan companies<br>to see analysis here.</div>
+      </div>
+      <div id="loadingState" class="loading-state" style="display:none;">
+        <div class="spinner"></div>
+        <div class="loading-text" id="loadingText">Analysing...</div>
+        <div class="loading-sub" id="loadingCompanyName"></div>
+      </div>
+      <div class="results-list" id="resultsList"></div>
+
+      <!-- Outreach card -->
+      <div id="outreachCard" style="display:none;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:12px;margin-top:8px;">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;flex-wrap:wrap;gap:6px;">
+          <div style="font-size:10px;font-weight:700;color:var(--text-dim);text-transform:uppercase;letter-spacing:0.8px;font-family:var(--mono);">&#9993; Draft Outreach</div>
+          <div style="display:flex;gap:6px;align-items:center;">
+            <select id="outreachFormat" style="background:var(--bg);border:1px solid var(--border);border-radius:4px;color:var(--text);font-size:10px;padding:3px 6px;font-family:var(--sans);cursor:pointer;">
+              <option value="connection">Connection Request</option>
+              <option value="inmail">InMail</option>
+            </select>
+            <button id="generateOutreachBtn" style="background:transparent;border:1px solid var(--accent);color:var(--accent);border-radius:4px;font-size:10px;padding:3px 8px;cursor:pointer;font-family:var(--sans);font-weight:600;">Generate</button>
+          </div>
+        </div>
+        <div id="outreachEmpty" style="font-size:11px;color:var(--text-dim);text-align:center;padding:10px 0;">Score a candidate first, then generate a personalised outreach message.</div>
+        <div id="outreachContent" style="display:none;">
+          <div style="font-size:10px;color:var(--text-muted);padding:6px 8px;background:var(--surface2);border:1px solid var(--border);border-radius:6px;margin-bottom:8px;line-height:1.5;">
+            &#9998; AI-generated draft — review and adjust for accuracy before sending.
+          </div>
+          <div id="outreachSubjectWrap" style="display:none;margin-bottom:6px;">
+            <div style="font-size:9px;color:var(--text-dim);font-family:var(--mono);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:3px;">Subject line</div>
+            <input type="text" id="outreachSubject" style="width:100%;background:var(--bg);border:1px solid var(--border);border-radius:4px;color:var(--text);font-size:11px;padding:5px 7px;font-family:inherit;" placeholder="Subject..." />
+          </div>
+          <textarea id="outreachBody" style="width:100%;background:var(--bg);border:1px solid var(--border);border-radius:4px;color:var(--text);font-size:11px;line-height:1.55;padding:7px 8px;font-family:inherit;resize:vertical;min-height:100px;" placeholder="Message will appear here..."></textarea>
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-top:5px;">
+            <div id="outreachCharCount" style="font-size:9px;font-family:var(--mono);color:var(--text-dim);">0 chars</div>
+            <div id="outreachCharLimit" style="font-size:9px;color:var(--text-dim);font-family:var(--mono);"></div>
+          </div>
+          <div style="display:flex;gap:6px;margin-top:6px;">
+            <button id="copyOutreachBtn" class="copy-btn">&#128203; Copy</button>
+            <button id="copyOutreachAllBtn" class="copy-btn" style="display:none;">&#128203; Copy All</button>
+          </div>
+
+          <!-- Feedback section -->
+          <div style="margin-top:10px;padding-top:10px;border-top:1px solid var(--border);">
+            <div style="font-size:9px;color:var(--text-dim);font-family:var(--mono);text-transform:uppercase;letter-spacing:0.8px;margin-bottom:6px;">Refine this draft</div>
+            <div style="display:flex;gap:5px;flex-wrap:wrap;margin-bottom:7px;" id="outreachQuickFeedback">
+              <button class="feedback-chip" data-feedback="Make it shorter">Shorter</button>
+              <button class="feedback-chip" data-feedback="Make it more specific to their background">More specific</button>
+              <button class="feedback-chip" data-feedback="Rewrite so it sounds like a real person wrote it — remove anything that sounds generated, templated, or corporate. Every sentence should feel natural and direct.">More human</button>
+              <button class="feedback-chip" data-feedback="Simplify the language — shorter sentences, no corporate words, no jargon">Simpler language</button>
+              <button class="feedback-chip" data-feedback="Make it more direct and concise">More direct</button>
+              <button class="feedback-chip" data-feedback="Make the opening line stronger">Stronger opening</button>
+            </div>
+            <div style="display:flex;gap:5px;">
+              <textarea id="outreachFeedbackInput" style="flex:1;background:var(--bg);border:1px solid var(--border);border-radius:4px;color:var(--text);font-size:11px;padding:6px 8px;font-family:inherit;resize:none;min-height:34px;max-height:80px;line-height:1.4;" placeholder="Or type your own feedback..."></textarea>
+              <button id="outreachFeedbackBtn" style="background:transparent;border:1px solid var(--accent);color:var(--accent);border-radius:4px;font-size:10px;padding:6px 10px;cursor:pointer;font-family:var(--sans);font-weight:600;white-space:nowrap;align-self:flex-end;">Revise ↩</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ASK -->
+
+    <div class="panel" id="panel-compare">
+      <div class="section-header">
+        <div class="section-title">Candidate shortlist</div>
+        <div class="section-subtitle">Review saved candidates by role, compare scores quickly, and export the data when needed.</div>
+      </div>
+      <div class="filter-bar" id="compareFilterBar" style="display:none;">
+        <button class="filter-pill active" data-filter="all">All</button>
+        <button class="filter-pill" data-filter="linkedin">LinkedIn</button>
+        <button class="filter-pill" data-filter="github">GitHub</button>
+      </div>
+      <div class="compare-helper">
+        <div class="compare-helper-title">How to use the shortlist</div>
+        <div class="compare-helper-text">Open a role to review its saved candidates. Each candidate stays ranked from highest to lowest score, and you can expand any profile for notes, dimensions, and recommendation detail.</div>
+      </div>
+      <div class="compare-toolbar">
+        <button class="btn-secondary" id="downloadAllCsvBtn" style="margin-top:0;flex:1;">Download full CSV</button>
+      </div>
+      <div class="empty-state" id="compareEmpty">
+        <div class="empty-icon">≋</div>
+        <div>No scored candidates yet.</div>
+        <div style="font-size:11px;color:var(--text-dim);margin-top:4px;">Score candidates and they’ll appear here grouped by role.</div>
+      </div>
+      <div id="compareGroups"></div>
+    </div>
+
+    <!-- HISTORY -->
+    <div class="panel" id="panel-history">
+      <div class="filter-bar" id="historyFilterBar" style="display:none;">
+        <button class="filter-pill active" data-filter="all">All</button>
+        <button class="filter-pill" data-filter="linkedin">LinkedIn</button>
+        <button class="filter-pill" data-filter="github">GitHub</button>
+      </div>
+      <div id="historyEmpty" class="empty-state">
+        <div class="empty-icon">◷</div>
+        <div class="empty-title">No history yet</div>
+        <div class="empty-desc">Scored profiles appear here<br>for comparison across candidates.</div>
+      </div>
+      <div id="historyList"></div>
+    </div>
+
+    <!-- SETTINGS -->
+    <div class="panel" id="panel-settings">
+      <div class="settings-group">
+        <div class="settings-label">AI Provider</div>
+        <select class="settings-input" id="providerSelect">
+          <option value="gemini">Google Gemini (free tier available)</option>
+          <option value="openai">OpenAI GPT-4o mini</option>
+        </select>
+      </div>
+      <div class="settings-group">
+        <div class="settings-label" id="apiKeyLabel">Gemini API Key</div>
+        <input type="password" class="settings-input" id="apiKeyInput" placeholder="AIza..." />
+        <div id="apiKeyNote" style="font-size:11px;color:var(--text-muted);margin-top:5px;line-height:1.6;">
+          <span id="apiKeyNoteGemini">
+            <a href="https://aistudio.google.com/app/apikey" target="_blank" style="color:var(--accent);text-decoration:none;font-weight:500;">Get Gemini API key →</a><br>
+            Free tier has daily request limits. For regular use, a paid API key is recommended.
+          </span>
+          <span id="apiKeyNoteOpenAI" style="display:none;">
+            <a href="https://platform.openai.com/api-keys" target="_blank" style="color:var(--accent);text-decoration:none;font-weight:500;">Get OpenAI API key →</a><br>
+            Requires a paid OpenAI account.
+          </span>
+        </div>
+      </div>
+
+      <div class="divider"></div>
+
+      <div class="settings-group">
+        <div class="settings-label">Role / ICP Profiles</div>
+        <div id="rolesList"></div>
+        <button class="btn-secondary" id="addRoleBtn" style="margin-top:4px;">+ New Role</button>
+      </div>
+
+      <div id="addRoleForm" class="add-role-form" style="display:none;">
+        <input type="text" class="settings-input" id="roleNameInput" placeholder="e.g. Account Executive" style="margin-bottom:6px;" />
+        <div style="margin-bottom:6px;">
+          <label style="font-size:9px;color:var(--text-dim);font-weight:500;text-transform:uppercase;letter-spacing:0.6px;font-family:var(--mono);display:block;margin-bottom:4px;">Target Company Type</label>
+          <div style="display:flex;gap:6px;flex-wrap:wrap;" id="companyTypeOptions">
+            <label class="ctype-label"><input type="checkbox" value="B2B"> B2B</label>
+            <label class="ctype-label"><input type="checkbox" value="B2C"> B2C</label>
+            <label class="ctype-label"><input type="checkbox" value="B2B+B2C"> B2B+B2C</label>
+            <label class="ctype-label"><input type="checkbox" value="Marketplace"> Marketplace</label>
+            <label class="ctype-label"><input type="checkbox" value="PLG"> PLG</label>
+          </div>
+        </div>
+        <div style="margin-bottom:6px;">
+          <label style="font-size:9px;color:var(--text-dim);font-weight:500;text-transform:uppercase;letter-spacing:0.6px;font-family:var(--mono);display:block;margin-bottom:4px;">Import from Job Description <span style="opacity:0.5;">(optional)</span></label>
+          <div class="jd-dropzone" id="jdDropzone" tabindex="0" role="button" aria-label="Drop JD PDF here or click to upload">
+            <div class="jd-dropzone-title">Drop JD here or click to upload</div>
+            <div class="jd-dropzone-sub">PDF only</div>
+          </div>
+          <input type="file" id="jdFileInput" accept=".pdf" style="display:none;" />
+          <div id="jdFileName" style="font-size:10px;color:var(--text-dim);margin-top:4px;display:none;"></div>
+          <div id="jdStatus" style="font-size:10px;color:var(--accent);margin-top:4px;display:none;"></div>
+          <div id="jdError" style="font-size:10px;color:var(--low);margin-top:4px;display:none;"></div>
+        </div>
+        <textarea class="settings-input" id="roleIcpInput" placeholder="ICP criteria:&#10;- B2B SaaS, 50-5000 employees&#10;- Enterprise or mid-market&#10;- Sales-led GTM"></textarea>
+        <button class="gen-dim-btn" id="generateDimsBtn" type="button">&#9889; Generate Scoring Dimensions</button>
+        <div id="dimensionsEditor" style="display:none;margin-top:8px;">
+          <label style="font-size:9px;color:var(--text-dim);font-weight:500;text-transform:uppercase;letter-spacing:0.6px;font-family:var(--mono);display:block;margin-bottom:6px;">Scoring Dimensions <span style="opacity:0.5;">(weights must total 100%)</span></label>
+          <div id="dimensionsList"></div>
+          <div id="weightTotal" style="font-size:9px;font-family:var(--mono);margin-top:4px;text-align:right;"></div>
+        </div>
+        <div style="margin-top:6px;">
+          <label style="font-size:9px;color:var(--text-dim);font-weight:500;text-transform:uppercase;letter-spacing:0.6px;font-family:var(--mono);">Custom Instructions <span style="opacity:0.5;">(optional)</span></label>
+          <textarea class="settings-input" id="rolePromptInput" style="margin-top:4px;min-height:50px;" placeholder="e.g. Weight quota attainment heavily. Penalise tenures under 12 months."></textarea>
+        </div>
+        <div style="margin-top:6px;">
+          <label style="font-size:9px;color:var(--text-dim);font-weight:500;text-transform:uppercase;letter-spacing:0.6px;font-family:var(--mono);">What makes this role compelling? <span style="opacity:0.5;">(optional — used in outreach)</span></label>
+          <textarea class="settings-input" id="roleCompellingInput" style="margin-top:4px;min-height:60px;" placeholder="e.g. Just raised Series B with ambitious growth plans. Greenfield territory with no existing accounts. Small team — real opportunity to shape how the region is built."></textarea>
+          <div style="font-size:9px;color:var(--text-dim);margin-top:3px;">2-3 sentences in your own words. Used as the foundation for paragraph 2 of every InMail for this role.</div>
+        </div>
+        <div style="margin-top:6px;">
+          <label style="font-size:9px;color:var(--text-dim);font-weight:500;text-transform:uppercase;letter-spacing:0.6px;font-family:var(--mono);">Direct Competitors <span style="opacity:0.5;">(optional — used in scoring)</span></label>
+          <input type="text" class="settings-input" id="roleCompetitorsInput" style="margin-top:4px;" placeholder="Who are the hiring company's competitors? e.g. Competitor A, Competitor B, Competitor C" />
+          <div style="font-size:9px;color:var(--text-dim);margin-top:3px;">Comma-separated list of direct competitors for the hiring company. Used to assess competitor experience during scoring.</div>
+        </div>
+        <button class="save-btn" id="saveRoleBtn">Save Role</button>
+      </div>
+
+      <div class="divider"></div>
+      <div class="settings-group">
+        <div class="settings-label">Recruiter Details <span style="color:var(--low);font-size:9px;font-weight:400;">Required for outreach</span></div>
+        <input type="text" class="settings-input" id="recruiterRoleTitleInput" placeholder="Your role title, e.g. Lead TA Partner" style="margin-bottom:6px;" />
+        <input type="text" class="settings-input" id="recruiterCompanyNameInput" placeholder="Hiring company name, e.g. Google" />
+        <div style="font-size:10px;color:var(--low);margin-top:5px;line-height:1.5;font-weight:500;">&#9888; Required. The extension will not run scoring or generate outreach without these fields filled in.</div>
+      </div>
+      <div class="divider"></div>
+      <div class="settings-group">
+        <div class="settings-label">Outreach Tone Sample <span style="font-size:9px;opacity:0.5;font-weight:400;">(optional)</span></div>
+        <div style="font-size:11px;color:var(--text-muted);line-height:1.6;padding:10px 12px;background:var(--accent-light);border:1px solid rgba(13,148,136,0.15);border-radius:8px;margin-bottom:8px;">
+          &#9432; Adding a tone sample is the single biggest lever for outreach quality. Paste a short, direct message you've sent that got a response — the AI will mirror your voice and style across all drafts.
+        </div>
+        <textarea class="settings-input" id="toneSampleInput" style="min-height:60px;" placeholder="Paste a short, direct message you've sent that got a response — 3-5 sentences max. The more natural and conversational it sounds, the better the output."></textarea>
+        <div style="font-size:9px;color:var(--text-dim);margin-top:3px;">Leave blank to use default tone. For best results, use an InMail or connection request you've personally written — not a template.</div>
+      </div>
+      <div class="divider"></div>
+      <button class="save-btn" id="saveSettingsBtn">Save Settings</button>
+      <div class="status-msg" id="statusMsg"></div>
+    </div>
+
+  </div>
+
+  <div class="confirm-overlay" id="confirmOverlay" aria-hidden="true">
+    <div class="confirm-dialog" role="dialog" aria-modal="true" aria-labelledby="confirmTitle" aria-describedby="confirmText">
+      <div class="confirm-title" id="confirmTitle">Are you sure?</div>
+      <div class="confirm-text" id="confirmText">Please confirm this action.</div>
+      <div class="confirm-actions">
+        <button class="btn-secondary" id="confirmCancelBtn" type="button">No, go back</button>
+        <button class="btn-danger" id="confirmOkBtn" type="button">Yes, delete</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="sidepanel.js"></script>
+</body>
+</html>

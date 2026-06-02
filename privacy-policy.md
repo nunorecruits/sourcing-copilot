@@ -1,12 +1,12 @@
 # Privacy Policy — Sourcing Copilot
 
-**Last updated: April 2026**
+**Last updated: June 2026**
 
 ---
 
 ## Overview
 
-Sourcing Copilot is a Chrome browser extension that helps recruiters score LinkedIn profiles against role criteria using AI. This policy explains what data is processed, how it is handled, and what is not collected.
+Sourcing Copilot is a Chrome browser extension that helps recruiters score LinkedIn and GitHub profiles against role criteria using AI. This policy explains what data is processed, how it is handled, and what is not collected.
 
 ---
 
@@ -17,7 +17,7 @@ Sourcing Copilot does not:
 - Collect, store or transmit any personal data to the developer or any developer-operated server
 - Track usage, analytics or behaviour
 - Store candidate profile data beyond your current browser session
-- Share any data with third parties other than the AI provider you explicitly configure
+- Share any data with third parties other than the AI provider and services you explicitly configure
 
 ---
 
@@ -26,6 +26,7 @@ Sourcing Copilot does not:
 The following data is processed locally in your browser and stored only in Chrome's local extension storage on your device:
 
 - Your AI provider API key (stored locally, never transmitted to us)
+- Your GitHub Personal Access Token (stored locally, only sent to GitHub's API)
 - Your role and ICP configurations
 - Your recruiter name and company name
 - Scored candidate history for the current session
@@ -37,9 +38,10 @@ This data never leaves your device except as described below.
 
 ## Data Sent to AI Providers
 
-When you score a profile or generate outreach, Sourcing Copilot sends the following data directly from your browser to your chosen AI provider (Google Gemini or OpenAI) using your own API key:
+When you score a profile, generate outreach, or upload a job description, Sourcing Copilot sends the following data directly from your browser to your chosen AI provider (Google Gemini or OpenAI) using your own API key:
 
-- Extracted text from the LinkedIn profile you are viewing
+- Extracted text from the LinkedIn or GitHub profile you are viewing
+- PDF content from LinkedIn profile exports or job description files you upload
 - Your ICP criteria and role configuration
 - Your recruiter name and company name (for outreach generation)
 
@@ -60,15 +62,44 @@ Use of LinkedIn data is subject to LinkedIn's User Agreement and Privacy Policy.
 
 ---
 
+## GitHub Data
+
+Sourcing Copilot reads publicly available data from GitHub user profiles and public repositories via the GitHub REST API. This includes:
+
+- Public profile information (name, bio, location, public email if set, company)
+- Public repository metadata (names, descriptions, languages, stars, forks)
+- Language byte counts across public repositories
+
+This data is fetched directly from GitHub's API using your own Personal Access Token. The token is stored locally in Chrome's extension storage and is only sent to `api.github.com`. It is never sent to the developer or any other party.
+
+GitHub profile data is only fetched when you explicitly trigger a scan on a GitHub profile page. Sourcing Copilot does not access private repositories, organisation data, or any data beyond what is publicly available.
+
+Use of GitHub data is subject to GitHub's Privacy Statement: https://docs.github.com/en/site-policy/privacy-policies/github-privacy-statement
+
+---
+
+## Job Description Uploads
+
+When you upload a job description PDF, the file content is read locally in your browser and sent directly to your chosen AI provider for extraction. The file is not stored beyond the current session and is not sent to the developer or any other party.
+
+---
+
 ## Permissions
 
 Sourcing Copilot requests the following Chrome permissions:
 
-- **activeTab** — to read the content of the LinkedIn profile tab you are currently viewing
-- **scripting** — to inject the content extraction script into the active LinkedIn tab
-- **storage** — to save your settings, API key and session history locally on your device
+- **activeTab** — to read the content of the profile tab you are currently viewing
+- **scripting** — to inject the content extraction script into the active tab
+- **storage** — to save your settings, API key, GitHub token, and session history locally on your device
 - **sidePanel** — to display the extension as a side panel within Chrome
-- **tabs** — to detect when you navigate to a LinkedIn profile
+- **tabs** — to detect when you navigate to a LinkedIn or GitHub profile
+
+Host permissions:
+
+- **linkedin.com** — to read LinkedIn profile content for scoring
+- **github.com** — to inject content scripts on GitHub profile pages
+- **generativelanguage.googleapis.com** — to send requests to the Google Gemini API using your key
+- **api.openai.com** — to send requests to the OpenAI API using your key
 
 No permission is used for any purpose other than the core functionality described above.
 
