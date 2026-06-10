@@ -137,7 +137,14 @@ function setupEventListeners() {
   wire('manualInput', 'keydown', function(e) { if (e.key === 'Enter') addManual(); });
   wire('notesArea', 'input', function() { clearTimeout(notesTimer); notesTimer = setTimeout(saveNotes, 800); });
   wire('saveSettingsBtn', 'click', saveSettings);
-  wire('saveApiKeyBtn', 'click', saveSettings);
+  wire('saveApiKeyBtn', 'click', function() {
+    saveSettings();
+    var note = document.getElementById('apiKeySavedNote');
+    if (note) {
+      note.textContent = '✓ API key saved.';
+      note.style.color = 'var(--accent)';
+    }
+  });
   wire('providerSelect', 'change', function(e) {
     updateApiKeyPlaceholder(e.target.value);
     document.getElementById('apiKeyInput').value = '';
