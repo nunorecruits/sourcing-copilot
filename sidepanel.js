@@ -377,6 +377,7 @@ function extractNameFromTitle(title) {
 // --- Gemini API ---
 async function callAI(apiKey, prompt, temperature = 0.2, model = MODEL_SCORE) {
   if (aiProvider === 'openai') return callOpenAI(apiKey, prompt, temperature);
+  if (aiProvider === 'anthropic') return callAnthropic(apiKey, prompt, temperature);
   return callGemini(apiKey, prompt, temperature, model);
 }
 
@@ -429,7 +430,34 @@ async function callGeminiWithParts(apiKey, parts, maxOutputTokens, temperature =
   return outParts.filter(p => p.text && !p.thought).map(p => p.text).join('');
 }
 
+async function callAnthropic(apiKey, prompt, temperature = 0.2) {
+  const res = await fetch('https://api.anthropic.com/v1/messages', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'x-api-key': apiKey,
+      'anthropic-version': '2023-06-01'
+    },
+    body: JSON.stringify({
+      model: 'claude-haiku-4-5',
+      max_tokens: 8000,
+      system: 'You are an expert recruiter assistant. Follow all instructions precisely. Return only valid JSON when asked — no markdown, no code fences, no explanation.',
+      messages: [{ role: 'user', content: prompt }],
+      temperature
+    })
+  });
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}));
+    throw new Error(`Anthropic API ${res.status}: ${err.error?.message || JSON.stringify(err)}`);
+  }
+  const data = await res.json();
+  return data.content?.filter(b => b.type === 'text').map(b => b.text).join('') || '';
+}
+
 async function callPdfAI(apiKey, prompt, pdfBase64, filename, temperature = 0) {
+  if (aiProvider === 'anthropic') {
+    return callAnthropic(apiKey, prompt, temperature);
+  }
   if (aiProvider === 'openai') {
     const res = await fetch('https://api.openai.com/v1/responses', {
       method: 'POST',
@@ -502,16 +530,25 @@ function updateApiKeyPlaceholder(provider) {
   const label = document.getElementById('apiKeyLabel');
   const noteGemini = document.getElementById('apiKeyNoteGemini');
   const noteOpenAI = document.getElementById('apiKeyNoteOpenAI');
+  const noteAnthropic = document.getElementById('apiKeyNoteAnthropic');
   if (provider === 'openai') {
     input.placeholder = 'sk-...';
     label.textContent = 'OpenAI API Key';
     if (noteGemini) noteGemini.style.display = 'none';
     if (noteOpenAI) noteOpenAI.style.display = 'inline';
+    if (noteAnthropic) noteAnthropic.style.display = 'none';
+  } else if (provider === 'anthropic') {
+    input.placeholder = 'sk-ant-...';
+    label.textContent = 'Anthropic API Key';
+    if (noteGemini) noteGemini.style.display = 'none';
+    if (noteOpenAI) noteOpenAI.style.display = 'none';
+    if (noteAnthropic) noteAnthropic.style.display = 'inline';
   } else {
     input.placeholder = 'AIza...';
     label.textContent = 'Gemini API Key';
     if (noteGemini) noteGemini.style.display = 'inline';
     if (noteOpenAI) noteOpenAI.style.display = 'none';
+    if (noteAnthropic) noteAnthropic.style.display = 'none';
   }
 }
 
