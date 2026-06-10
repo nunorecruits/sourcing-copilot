@@ -21,7 +21,7 @@ Sourcing Copilot is a Chrome side panel extension for recruiters. Open any Linke
 - **Company analysis** — scan employers from a profile and analyse each one for ICP fit, size, stage, and industry.
 - **Candidate shortlist** — save and compare scored candidates by role. Filter by source (LinkedIn / GitHub). Export to CSV.
 - **Worth Exploring** — contextual signals flagged separately from confirmed evidence, so you know what to probe in a screening call.
-- **Works with Gemini and OpenAI** — bring your own API key.
+- **Works with Gemini, OpenAI, and Anthropic** — bring your own API key.
 
 ---
 
@@ -42,6 +42,10 @@ Or load unpacked from source — see [Development setup](#development-setup) bel
 **OpenAI (paid):**
 1. Go to [platform.openai.com/api-keys](https://platform.openai.com/api-keys)
 2. Create a new secret key
+
+**Anthropic (paid):**
+1. Go to [console.anthropic.com/settings/keys](https://console.anthropic.com/settings/keys)
+2. Create a new API key (starts with `sk-ant-...`)
 
 ### 3. Configure your first role
 
@@ -170,7 +174,7 @@ No build step required — pure HTML, CSS, and vanilla JS.
 ## Privacy
 
 - All profile data is processed locally in your browser
-- Profile text is sent to your chosen AI provider (Gemini or OpenAI) using your own API key
+- Profile text is sent to your chosen AI provider (Gemini, OpenAI, or Anthropic) using your own API key
 - GitHub API requests are made directly from your browser using your own token
 - No data is sent to any Sourcing Copilot servers
 - No data is stored beyond your browser's local storage
