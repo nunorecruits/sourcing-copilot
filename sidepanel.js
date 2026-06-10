@@ -457,7 +457,34 @@ async function callAnthropic(apiKey, prompt, temperature = 0.2) {
 
 async function callPdfAI(apiKey, prompt, pdfBase64, filename, temperature = 0) {
   if (aiProvider === 'anthropic') {
-    return callAnthropic(apiKey, prompt, temperature);
+    const res = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-api-key': apiKey,
+        'anthropic-version': '2023-06-01',
+        'anthropic-dangerous-direct-browser-access': 'true'
+      },
+      body: JSON.stringify({
+        model: 'claude-haiku-4-5',
+        max_tokens: 8000,
+        system: 'You are an expert recruiter assistant. Follow all instructions precisely. Return only valid JSON when asked — no markdown, no code fences, no explanation.',
+        messages: [{
+          role: 'user',
+          content: [
+            { type: 'document', source: { type: 'base64', media_type: 'application/pdf', data: pdfBase64 } },
+            { type: 'text', text: prompt }
+          ]
+        }],
+        temperature
+      })
+    });
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({}));
+      throw new Error(`Anthropic API ${res.status}: ${err.error?.message || JSON.stringify(err)}`);
+    }
+    const data = await res.json();
+    return data.content?.filter(b => b.type === 'text').map(b => b.text).join('') || '';
   }
   if (aiProvider === 'openai') {
     const res = await fetch('https://api.openai.com/v1/responses', {
