@@ -3,7 +3,7 @@
 **AI-assisted profile scoring, GitHub technical analysis, shortlist building, and outreach. All inside your browser.**
 
 [![Chrome Web Store](https://img.shields.io/badge/Chrome%20Web%20Store-Install-teal)](https://chromewebstore.google.com/detail/ffgaljblcpgcamndlegkbbbebnhkjini)
-![Version](https://img.shields.io/badge/version-3.0.2-blue)
+![Version](https://img.shields.io/badge/version-3.0.3-blue)
 
 ---
 
@@ -179,6 +179,11 @@ No build step required — pure HTML, CSS, and vanilla JS.
 ---
 
 ## Changelog
+
+### v3.0.3
+- **Anthropic Claude Haiku 4.5** — added as a third AI provider option alongside Gemini and OpenAI
+- **Save API Key button** — dedicated button below the API key input with confirmation feedback
+- **Recruiter details confirmation** — status messages turn green once recruiter details are saved
 
 ### v3.0.2
 - **GitHub Technical Analysis** — new GitHub tab with full profile scan: language breakdown by byte count, notable projects, technical summary, outreach hook, and Suitability Fit Signal against active role
