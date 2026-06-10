@@ -2470,7 +2470,15 @@ function saveSettings() {
   toneSample = document.getElementById('toneSampleInput').value.trim();
   recruiterRoleTitle = document.getElementById('recruiterRoleTitleInput').value.trim();
   recruiterCompanyName = document.getElementById('recruiterCompanyNameInput').value.trim();
-  chrome.storage.local.set({ apiKey, aiProvider, roles, activeRoleId, toneSample, recruiterRoleTitle, recruiterCompanyName }, function() { showStatus('Settings saved.'); });
+  chrome.storage.local.set({ apiKey, aiProvider, roles, activeRoleId, toneSample, recruiterRoleTitle, recruiterCompanyName }, function() {
+    showStatus('Settings saved.');
+    if (recruiterRoleTitle && recruiterCompanyName) {
+      var lbl = document.getElementById('recruiterDetailsLabel');
+      var note = document.getElementById('recruiterDetailsNote');
+      if (lbl) { lbl.textContent = '✓ Recruiter Details Added'; lbl.style.color = 'var(--accent)'; }
+      if (note) { note.textContent = '✓ Recruiter Details Added'; note.style.color = 'var(--accent)'; }
+    }
+  });
 }
 
 function updateRoleBar() {
