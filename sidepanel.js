@@ -1127,6 +1127,14 @@ ${returnSchema}`;
       });
       const data = await res.json();
       aiResponse = data.choices?.[0]?.message?.content || '';
+    } else if (activeAiProvider === 'anthropic') {
+      const res = await fetch('https://api.anthropic.com/v1/messages', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'x-api-key': apiKey, 'anthropic-version': '2023-06-01', 'anthropic-dangerous-direct-browser-access': 'true' },
+        body: JSON.stringify({ model: 'claude-haiku-4-5', max_tokens: 1200, messages: [{ role: 'user', content: modelPrompt }], temperature: 0.3 })
+      });
+      const data = await res.json();
+      aiResponse = data.content?.filter(b => b.type === 'text').map(b => b.text).join('') || '';
     } else {
       const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`, {
         method: 'POST',
