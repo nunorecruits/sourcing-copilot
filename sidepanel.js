@@ -496,7 +496,7 @@ async function callPdfAI(apiKey, prompt, pdfBase64, filename, temperature = 0) {
         'Authorization': `Bearer ${apiKey}`
       },
       body: JSON.stringify({
-        model: 'gpt-4.5-mini',
+        model: 'gpt-5.4-mini',
         input: [{
           role: 'user',
           content: [
@@ -538,7 +538,7 @@ async function callOpenAI(apiKey, prompt, temperature = 0.2) {
       'Authorization': `Bearer ${apiKey}`
     },
     body: JSON.stringify({
-      model: 'gpt-4.5-mini',
+      model: 'gpt-5.4-mini',
       messages: [
         { role: 'system', content: 'You are an expert recruiter assistant. Follow all instructions precisely. Return only valid JSON when asked — no markdown, no code fences, no explanation.' },
         { role: 'user', content: prompt }
@@ -1125,7 +1125,7 @@ ${returnSchema}`;
       const res = await fetch('https://api.openai.com/v1/chat/completions', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + apiKey },
-        body: JSON.stringify({ model: 'gpt-4.5-mini', messages: [{ role: 'user', content: modelPrompt }], temperature: 0.3, max_tokens: 1200 })
+        body: JSON.stringify({ model: 'gpt-5.4-mini', messages: [{ role: 'user', content: modelPrompt }], temperature: 0.3, max_tokens: 1200 })
       });
       const data = await res.json();
       aiResponse = data.choices?.[0]?.message?.content || '';
