@@ -22,8 +22,8 @@ let autoScanTimer = null;
 let lastAutoScan = 0;
 let confirmResolver = null;
 
-const MODEL_SCORE = 'gemini-2.5-flash';  // better instruction following for nuanced evidence rules — scoring, extraction, analysis
-const MODEL_WRITE = 'gemini-2.5-flash';          // reasoning — outreach generation, revision, dimension generation
+const MODEL_SCORE = 'gemini-3.5-flash';  // better instruction following for nuanced evidence rules — scoring, extraction, analysis
+const MODEL_WRITE = 'gemini-3.5-flash';          // reasoning — outreach generation, revision, dimension generation
 const AUTO_SCAN_COOLDOWN = 10000;
 const OUTREACH_LIMITS = { connection: 280, inmail_body: 1300 };
 const OUTREACH_TARGETS = { connection: 180, inmail_body: 900 };
@@ -100,6 +100,7 @@ async function loadFromStorage() {
       roles = data.roles || [];
       activeRoleId = data.activeRoleId || null;
       sessionHistory = data.history || [];
+      updateSettingsConfirmationUI(data.apiKey || '', data.recruiterRoleTitle || '', data.recruiterCompanyName || '');
       resolve();
     });
   });
@@ -137,14 +138,7 @@ function setupEventListeners() {
   wire('manualInput', 'keydown', function(e) { if (e.key === 'Enter') addManual(); });
   wire('notesArea', 'input', function() { clearTimeout(notesTimer); notesTimer = setTimeout(saveNotes, 800); });
   wire('saveSettingsBtn', 'click', saveSettings);
-  wire('saveApiKeyBtn', 'click', function() {
-    saveSettings();
-    var note = document.getElementById('apiKeySavedNote');
-    if (note) {
-      note.textContent = '✓ API key saved.';
-      note.style.color = 'var(--accent)';
-    }
-  });
+  wire('saveApiKeyBtn', 'click', saveSettings);
   wire('providerSelect', 'change', function(e) {
     updateApiKeyPlaceholder(e.target.value);
     document.getElementById('apiKeyInput').value = '';
@@ -502,7 +496,7 @@ async function callPdfAI(apiKey, prompt, pdfBase64, filename, temperature = 0) {
         'Authorization': `Bearer ${apiKey}`
       },
       body: JSON.stringify({
-        model: 'gpt-4o-mini',
+        model: 'gpt-4.5-mini',
         input: [{
           role: 'user',
           content: [
@@ -544,7 +538,7 @@ async function callOpenAI(apiKey, prompt, temperature = 0.2) {
       'Authorization': `Bearer ${apiKey}`
     },
     body: JSON.stringify({
-      model: 'gpt-4o-mini',
+      model: 'gpt-4.5-mini',
       messages: [
         { role: 'system', content: 'You are an expert recruiter assistant. Follow all instructions precisely. Return only valid JSON when asked — no markdown, no code fences, no explanation.' },
         { role: 'user', content: prompt }
@@ -1123,7 +1117,7 @@ ${repoSummary || 'No public repos found.'}${fitRoleContext}
 Return ONLY a raw JSON object, no markdown, no backticks:
 ${returnSchema}`;
 
-    const model = 'gemini-2.5-flash';
+    const model = 'gemini-3.5-flash';
     const activeAiProvider = aiProvider;
     let aiResponse = '';
 
@@ -1131,7 +1125,7 @@ ${returnSchema}`;
       const res = await fetch('https://api.openai.com/v1/chat/completions', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + apiKey },
-        body: JSON.stringify({ model: 'gpt-4o-mini', messages: [{ role: 'user', content: modelPrompt }], temperature: 0.3, max_tokens: 1200 })
+        body: JSON.stringify({ model: 'gpt-4.5-mini', messages: [{ role: 'user', content: modelPrompt }], temperature: 0.3, max_tokens: 1200 })
       });
       const data = await res.json();
       aiResponse = data.choices?.[0]?.message?.content || '';
@@ -2464,6 +2458,28 @@ function saveRole() {
   });
 }
 
+function updateSettingsConfirmationUI(apiKey, rTitle, rCompany) {
+  var apiKeyNote = document.getElementById('apiKeySavedNote');
+  if (apiKeyNote) {
+    if (apiKey) {
+      apiKeyNote.textContent = '✓ API key saved.';
+      apiKeyNote.style.color = 'var(--accent)';
+    } else {
+      apiKeyNote.textContent = '⚠ Save your API key before completing other settings.';
+      apiKeyNote.style.color = '#ef4444';
+    }
+  }
+  var lbl = document.getElementById('recruiterDetailsLabel');
+  var note = document.getElementById('recruiterDetailsNote');
+  if (rTitle && rCompany) {
+    if (lbl) { lbl.textContent = '✓ Recruiter Details Added'; lbl.style.color = 'var(--accent)'; }
+    if (note) { note.textContent = '✓ Recruiter Details Added'; note.style.color = 'var(--accent)'; }
+  } else {
+    if (lbl) { lbl.textContent = 'Required for outreach'; lbl.style.color = 'var(--low)'; }
+    if (note) { note.textContent = '⚠ Required. The extension will not run scoring or generate outreach without these fields filled in.'; note.style.color = 'var(--low)'; }
+  }
+}
+
 function saveSettings() {
   var apiKey = document.getElementById('apiKeyInput').value.trim();
   aiProvider = document.getElementById('providerSelect').value;
@@ -2472,12 +2488,7 @@ function saveSettings() {
   recruiterCompanyName = document.getElementById('recruiterCompanyNameInput').value.trim();
   chrome.storage.local.set({ apiKey, aiProvider, roles, activeRoleId, toneSample, recruiterRoleTitle, recruiterCompanyName }, function() {
     showStatus('Settings saved.');
-    if (recruiterRoleTitle && recruiterCompanyName) {
-      var lbl = document.getElementById('recruiterDetailsLabel');
-      var note = document.getElementById('recruiterDetailsNote');
-      if (lbl) { lbl.textContent = '✓ Recruiter Details Added'; lbl.style.color = 'var(--accent)'; }
-      if (note) { note.textContent = '✓ Recruiter Details Added'; note.style.color = 'var(--accent)'; }
-    }
+    updateSettingsConfirmationUI(apiKey, recruiterRoleTitle, recruiterCompanyName);
   });
 }
 
