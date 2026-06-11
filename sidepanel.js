@@ -1133,7 +1133,7 @@ ${returnSchema}`;
       const res = await fetch('https://api.openai.com/v1/chat/completions', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + apiKey },
-        body: JSON.stringify({ model: 'gpt-5.4-mini', messages: [{ role: 'user', content: modelPrompt }], temperature: 0.3, max_tokens: 1200 })
+        body: JSON.stringify({ model: 'gpt-5.4-mini', messages: [{ role: 'system', content: 'You are an expert technical recruiter. Return only raw JSON — no markdown, no code fences, no explanation.' }, { role: 'user', content: modelPrompt }], temperature: 0.3, max_tokens: 4000 })
       });
       if (!res.ok) {
         const err = await res.json().catch(() => ({}));
@@ -1192,6 +1192,7 @@ ${returnSchema}`;
       outreachHook = hookMatch ? hookMatch[1] : '';
     }
 
+    if (!summary && aiResponse) throw new Error(`AI response could not be parsed. Raw response: ${aiResponse.substring(0, 200)}`);
     githubData = { user, ownRepos, langsSorted, notableProjects, lastPushed, totalStars, tier, summary, outreachHook, fitTier, fitReasons, fitRoleName };
 
     // Save to history and results
