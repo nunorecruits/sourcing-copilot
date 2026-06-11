@@ -3,7 +3,7 @@
 **AI-assisted profile scoring, GitHub technical analysis, shortlist building, and outreach. All inside your browser.**
 
 [![Chrome Web Store](https://img.shields.io/badge/Chrome%20Web%20Store-Install-teal)](https://chromewebstore.google.com/detail/ffgaljblcpgcamndlegkbbbebnhkjini)
-![Version](https://img.shields.io/badge/version-3.0.3-blue)
+![Version](https://img.shields.io/badge/version-3.0.4-blue)
 
 ---
 
@@ -183,6 +183,10 @@ No build step required — pure HTML, CSS, and vanilla JS.
 ---
 
 ## Changelog
+
+### v3.0.4
+- **Model updates** — Gemini updated to 3.5 Flash, OpenAI updated to GPT-5.4 mini
+- **Settings confirmation fix** — API key saved and recruiter details messages now correctly reflect saved state on load and after save
 
 ### v3.0.3
 - **Anthropic Claude Haiku 4.5** — added as a third AI provider option alongside Gemini and OpenAI
