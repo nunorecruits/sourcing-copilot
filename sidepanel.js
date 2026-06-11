@@ -552,7 +552,7 @@ async function callOpenAI(apiKey, prompt, temperature = 0.2) {
         { role: 'user', content: prompt }
       ],
       temperature,
-      max_tokens: 8000
+      max_completion_tokens: 8000
     })
   });
   if (!res.ok) {
@@ -1133,7 +1133,7 @@ ${returnSchema}`;
       const res = await fetch('https://api.openai.com/v1/chat/completions', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + apiKey },
-        body: JSON.stringify({ model: 'gpt-5.4-mini', messages: [{ role: 'system', content: 'You are an expert technical recruiter. Return only raw JSON — no markdown, no code fences, no explanation.' }, { role: 'user', content: modelPrompt }], temperature: 0.3, max_tokens: 4000 })
+        body: JSON.stringify({ model: 'gpt-5.4-mini', messages: [{ role: 'system', content: 'You are an expert technical recruiter. Return only raw JSON — no markdown, no code fences, no explanation.' }, { role: 'user', content: modelPrompt }], temperature: 0.3, max_completion_tokens: 4000 })
       });
       if (!res.ok) {
         const err = await res.json().catch(() => ({}));
