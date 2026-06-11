@@ -503,7 +503,7 @@ async function callPdfAI(apiKey, prompt, pdfBase64, filename, temperature = 0) {
             {
               type: 'input_file',
               filename: filename || 'linkedin-profile.pdf',
-              file_data: pdfBase64
+              file_data: `data:application/pdf;base64,${pdfBase64}`
             },
             {
               type: 'input_text',
