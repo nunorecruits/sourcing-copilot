@@ -139,9 +139,17 @@ function setupEventListeners() {
   wire('notesArea', 'input', function() { clearTimeout(notesTimer); notesTimer = setTimeout(saveNotes, 800); });
   wire('saveSettingsBtn', 'click', saveSettings);
   wire('saveApiKeyBtn', 'click', saveSettings);
+  wire('apiKeyInput', 'input', function() {
+    var note = document.getElementById('apiKeySavedNote');
+    if (note) { note.textContent = '⚠ Save your API key before completing other settings.'; note.style.color = '#ef4444'; }
+  });
+  wire('recruiterRoleTitleInput', 'input', resetRecruiterDetailsNote);
+  wire('recruiterCompanyNameInput', 'input', resetRecruiterDetailsNote);
   wire('providerSelect', 'change', function(e) {
     updateApiKeyPlaceholder(e.target.value);
     document.getElementById('apiKeyInput').value = '';
+    var note = document.getElementById('apiKeySavedNote');
+    if (note) { note.textContent = '⚠ Save your API key before completing other settings.'; note.style.color = '#ef4444'; }
   });
   wire('saveRoleBtn', 'click', saveRole);
   wire('generateDimsBtn', 'click', generateDimensions);
@@ -2458,6 +2466,13 @@ function saveRole() {
     pendingDimensions = [];
     showStatus('Role saved.');
   });
+}
+
+function resetRecruiterDetailsNote() {
+  var lbl = document.getElementById('recruiterDetailsLabel');
+  var note = document.getElementById('recruiterDetailsNote');
+  if (lbl) { lbl.textContent = 'Required for outreach'; lbl.style.color = 'var(--low)'; }
+  if (note) { note.textContent = '⚠ Required. The extension will not run scoring or generate outreach without these fields filled in.'; note.style.color = 'var(--low)'; }
 }
 
 function updateSettingsConfirmationUI(apiKey, rTitle, rCompany) {
