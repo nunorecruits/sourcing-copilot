@@ -2186,6 +2186,8 @@ function renderRoles() {
   list.querySelectorAll('.role-delete').forEach(el => {
     el.addEventListener('click', e => {
       e.stopPropagation();
+      const roleToDelete = roles.find(r => r.id === el.dataset.id);
+      if (!confirm(`Delete role "${roleToDelete?.name || 'this role'}"? This cannot be undone.`)) return;
       roles = roles.filter(r => r.id !== el.dataset.id);
       if (activeRoleId === el.dataset.id) activeRoleId = roles[0]?.id || null;
       if (editingRoleId === el.dataset.id) {
