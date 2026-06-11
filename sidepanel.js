@@ -1135,6 +1135,10 @@ ${returnSchema}`;
         headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + apiKey },
         body: JSON.stringify({ model: 'gpt-5.4-mini', messages: [{ role: 'user', content: modelPrompt }], temperature: 0.3, max_tokens: 1200 })
       });
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}));
+        throw new Error(`OpenAI API ${res.status}: ${err.error?.message || JSON.stringify(err)}`);
+      }
       const data = await res.json();
       aiResponse = data.choices?.[0]?.message?.content || '';
     } else if (activeAiProvider === 'anthropic') {
@@ -1143,6 +1147,10 @@ ${returnSchema}`;
         headers: { 'Content-Type': 'application/json', 'x-api-key': apiKey, 'anthropic-version': '2023-06-01', 'anthropic-dangerous-direct-browser-access': 'true' },
         body: JSON.stringify({ model: 'claude-haiku-4-5', max_tokens: 1200, messages: [{ role: 'user', content: modelPrompt }], temperature: 0.3 })
       });
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}));
+        throw new Error(`Anthropic API ${res.status}: ${err.error?.message || JSON.stringify(err)}`);
+      }
       const data = await res.json();
       aiResponse = data.content?.filter(b => b.type === 'text').map(b => b.text).join('') || '';
     } else {
@@ -1151,6 +1159,10 @@ ${returnSchema}`;
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ contents: [{ parts: [{ text: modelPrompt }] }], generationConfig: { temperature: 0.3, maxOutputTokens: 1200, thinkingConfig: { thinkingBudget: 0 } } })
       });
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}));
+        throw new Error(`Gemini API ${res.status}: ${err.error?.message || JSON.stringify(err)}`);
+      }
       const data = await res.json();
       aiResponse = data.candidates?.[0]?.content?.parts?.[0]?.text || '';
     }
