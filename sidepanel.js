@@ -22,8 +22,8 @@ let autoScanTimer = null;
 let lastAutoScan = 0;
 let confirmResolver = null;
 
-const MODEL_SCORE = 'gemini-3.5-flash';  // better instruction following for nuanced evidence rules — scoring, extraction, analysis
-const MODEL_WRITE = 'gemini-3.5-flash';          // reasoning — outreach generation, revision, dimension generation
+const MODEL_SCORE = 'gemini-2.5-flash';  // GA-stable until Oct 2026 — scoring, extraction, company analysis
+const MODEL_WRITE = 'gemini-2.5-flash';          // GA-stable until Oct 2026 — outreach generation, dimension generation
 const AUTO_SCAN_COOLDOWN = 10000;
 const OUTREACH_LIMITS = { connection: 280, inmail_body: 1300 };
 const OUTREACH_TARGETS = { connection: 180, inmail_body: 900 };
@@ -849,6 +849,9 @@ RULE 5 — SCORE ONLY WHAT IS EVIDENCED.
 A dimension with no confirmed evidence from the profile must score 0–15 and the note must state "No evidence on candidate profile."
 Do not award scores based on what a role typically involves or what a company typically does.
 
+RULE 6 — STRENGTHS MUST BE ROLE-RELEVANT.
+Only include in strengths what is confirmed evidence AND directly relevant to the ICP criteria above. General career achievements, leadership accomplishments, or skills unrelated to the role must not appear in strengths — even if confirmed. A TA leader's hiring metrics are not a strength for a JavaScript Developer role. If no relevant strengths exist, return an empty array.
+
 PROCEDURAL RULES:
 Tenure: Calculate only when both start AND end dates are explicitly stated. Use today's date for "Present". If dates are missing — state "dates not specified", do not estimate.
 Promotions: Multiple titles at the same employer = one tenure. Treat explicit promotions as a positive signal.
@@ -878,7 +881,7 @@ Evaluate the candidate carefully. Return ONLY a raw JSON object — no markdown,
   "tier": "<Strong|Potential|Weak>",
   "headline": "<one concise line, max 20 words — confirmed evidence only>",
   "dimensions": [<dimension objects — note field max 25 words, confirmed evidence only or 'not evidenced in profile'>],
-  "strengths": ["<confirmed evidence only — max 20 words each>"],
+  "strengths": ["<confirmed evidence that is directly relevant to the ICP and role criteria above — not general career achievements. If no relevant evidence exists, return an empty array. Max 20 words each>"],
   "gaps": ["<ICP requirements not evidenced in profile — max 20 words each>"],
   "redFlags": ["<confirmed concerns only — max 20 words each, or empty array>"],
   "explore": ["<contextual signals only — things worth probing in a screening call because the candidate's employer context suggests possible relevance not yet confirmed. Only include if there is a genuine contextual signal. If nothing qualifies, return an empty array. Do not speculate or infer. Max 25 words each>"],
@@ -1125,7 +1128,7 @@ ${repoSummary || 'No public repos found.'}${fitRoleContext}
 Return ONLY a raw JSON object, no markdown, no backticks:
 ${returnSchema}`;
 
-    const model = 'gemini-3.5-flash';
+    const model = 'gemini-2.5-flash';
     const activeAiProvider = aiProvider;
     let aiResponse = '';
 
@@ -1561,12 +1564,12 @@ async function analyseCompany(companyName, role, apiKey) {
   const companyTypeStr = role.companyTypes?.length
     ? `\nTARGET COMPANY TYPE: ${role.companyTypes.join(', ')} — flag if this company does not match.`
     : '';
-  const prompt = `Analyse the company "${companyName}" for a recruiter hiring for:\nROLE: ${role.name}\nICP: ${role.icp}${companyTypeStr}\nBe concise. Use "Unknown" for unverifiable fields.\n\nReturn ONLY a raw JSON object — no markdown, no code fences:\n{"company": "${companyName}", "relevance": "<High|Medium|Low>", "summary": "<2-3 sentences>", "meta": ["Industry: X", "Size: X", "Stage: X", "HQ: X", "Type: <B2B|B2C|B2B+B2C|Marketplace|PLG|Unknown>"], "reasoning": "<1-2 sentences on ICP fit, mention company type match or mismatch>"}`;
+  const prompt = `Analyse the company "${companyName}" for a recruiter hiring for:\nROLE: ${role.name}\nICP: ${role.icp}${companyTypeStr}\nBe concise. Use "Unknown" for unverifiable fields.\n\nReturn ONLY a raw JSON object — no markdown, no code fences:\n{"company": "${companyName}", "relevance": "<High|Medium|Low>", "summary": "<2-3 sentences>", "meta": ["Industry: X", "Size: X", "Stage: X", "HQ: X", "Type: <B2B|B2C|B2B+B2C|Marketplace|PLG|Unknown>"], "tech_stack": ["<confirmed tool or technology>"], "customers_industries": ["<sector or industry this company sells into>"], "reasoning": "<1-2 sentences on ICP fit, mention company type match or mismatch>"}\n\nFor tech_stack: list only confirmed tools, languages, frameworks, or platforms this company is known to use (e.g. Python, Salesforce, AWS, React). Maximum 8. Use empty array [] if unknown.\nFor customers_industries: ONLY populate if the company is B2B, B2B+B2C, or PLG. List the specific sectors or industries this company sells into (e.g. Financial Services, Insurance, Manufacturing, Healthcare, Public Sector, Retail, Telecoms). Maximum 6. Use empty array [] if B2C-only, Marketplace, or unknown customer base.`;
 
   const text = await callAI(apiKey, prompt, 0, MODEL_SCORE);
   const parsed = parseJSON(text);
   if (parsed && parsed.relevance && parsed.summary) return parsed;
-  return { company: companyName, relevance: 'unknown', summary: text?.substring(0, 200) || 'No response.', meta: [], reasoning: 'Parse failed.' };
+  return { company: companyName, relevance: 'unknown', summary: text?.substring(0, 200) || 'No response.', meta: [], tech_stack: [], customers_industries: [], reasoning: 'Parse failed.' };
 }
 
 // --- Company management ---
@@ -2037,7 +2040,6 @@ function renderResults() {
       + '<div class="flex-fill">'
       + '<div class="candidate-label">CANDIDATE FIT &middot; ' + nameLink + '</div>'
       + '<div class="source-tag-row"><span class="source-tag">' + escapeHtml(sourceLabel) + '</span></div>'
-      + '<div class="candidate-headline">' + escapeHtml(s.headline || '') + '</div>'
       + '</div>'
       + '<div class="candidate-score-wrap">'
       + '<div class="candidate-score score-tier-' + tierClass + '">' + s.score + '<span class="score-denom">/100</span></div>'
@@ -2053,12 +2055,18 @@ function renderResults() {
       + '<div class="score-exp-divider"></div>'
       + '<div class="score-exp-note">' + scoreExpNote + '</div>'
       + '</div></div>'
+      + (s.recommendation ? '<div class="profile-section tldr-section">'
+        + '<div class="profile-section-label tldr-label">'
+        + 'TL;DR'
+        + '<button class="tldr-copy-btn" id="tldrCopyBtn" title="Copy recommendation">&#128203; Copy</button>'
+        + '</div>'
+        + '<div class="tldr-text">' + escapeHtml(s.recommendation) + '</div>'
+        + '</div>' : '')
       + (dimBars ? '<div class="profile-section"><div class="profile-section-label">ICP Dimensions</div><div class="dim-grid">' + dimBars + '</div></div>' : '')
       + (strengths ? '<div class="profile-section"><div class="profile-section-label">Strengths</div><ul class="profile-list">' + strengths + '</ul></div>' : '')
       + (gaps ? '<div class="profile-section"><div class="profile-section-label">Gaps</div><ul class="profile-list gaps">' + gaps + '</ul></div>' : '')
       + (redFlags ? '<div class="profile-section"><div class="profile-section-label red-flag-label">Red Flags</div><ul class="profile-list red-flags">' + redFlags + '</ul></div>' : '')
       + (exploreItems ? '<div class="profile-section"><div class="profile-section-label explore-label">Worth Exploring</div><ul class="profile-list explore-list">' + exploreItems + '</ul></div>' : '')
-      + (s.recommendation ? '<div class="result-reasoning"><strong>Recommendation:</strong> ' + escapeHtml(s.recommendation) + '</div>' : '')
       + '<div class="action-row">'
       + '<button class="copy-btn" id="copyBtn">&#128203; Copy</button>'
       + '</div></div>'
@@ -2070,6 +2078,8 @@ function renderResults() {
   html += sorted.map(function(r) {
     var rel = (r.relevance || 'unknown').toLowerCase();
     var metaChips = (r.meta || []).map(function(m) { return '<span class="meta-chip">' + escapeHtml(m) + '</span>'; }).join('');
+    var techChips = (r.tech_stack || []).filter(Boolean).map(function(t) { return '<span class="tech-chip">' + escapeHtml(t) + '</span>'; }).join('');
+    var customerChips = (r.customers_industries || []).filter(Boolean).map(function(c) { return '<span class="customer-chip">' + escapeHtml(c) + '</span>'; }).join('');
     var companyUrl = companyLinks[r.company] || 'https://www.linkedin.com/search/results/companies/?keywords=' + encodeURIComponent(r.company || '');
     return '<div class="result-card">'
       + '<div class="result-header">'
@@ -2078,8 +2088,11 @@ function renderResults() {
       + '</div>'
       + '<span class="relevance-badge relevance-' + rel + '">' + escapeHtml(r.relevance || 'Unknown') + '</span>'
       + '</div>'
+      + '<div class="company-overview-label">Company Overview</div>'
       + '<div class="result-summary">' + escapeHtml(r.summary || '') + '</div>'
       + (metaChips ? '<div class="result-meta">' + metaChips + '</div>' : '')
+      + (customerChips ? '<div class="tech-stack-row" style="margin-top:8px;"><span class="tech-stack-label">Customers</span><div class="tech-chips">' + customerChips + '</div></div>' : '')
+      + (techChips ? '<div class="tech-stack-row" style="margin-top:6px;"><span class="tech-stack-label">Tech Stack</span><div class="tech-chips">' + techChips + '</div></div>' : '')
       + (r.reasoning ? '<div class="result-reasoning"><strong>ICP fit:</strong> ' + escapeHtml(r.reasoning) + '</div>' : '')
       + '</div>';
   }).join('');
@@ -2094,6 +2107,18 @@ function renderResults() {
 
   updateOutreachCard();
   wireOutreachFeedbackChips();
+
+  // TL;DR copy button
+  const tldrCopyBtn = document.getElementById('tldrCopyBtn');
+  if (tldrCopyBtn && candidateScore?.recommendation) {
+    tldrCopyBtn.addEventListener('click', function() {
+      navigator.clipboard.writeText(candidateScore.recommendation).then(() => {
+        const orig = tldrCopyBtn.innerHTML;
+        tldrCopyBtn.innerHTML = 'Copied!';
+        setTimeout(() => { tldrCopyBtn.innerHTML = orig; }, 1800);
+      });
+    });
+  }
 
   // Score info toggle
   const scoreInfoBtn = document.querySelector('.score-info-btn');

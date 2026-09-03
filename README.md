@@ -9,7 +9,7 @@
 
 ## What it does
 
-Sourcing Copilot is a Chrome side panel extension for recruiters. Open any LinkedIn or GitHub profile and get a structured candidate assessment in seconds — scored against your own ICP criteria with weighted dimensions, strengths, gaps, red flags, and a recommendation. Scores are a triage aid, not a decision — every recommendation is designed to be reviewed by a recruiter before any outreach or advancement decision is made.
+Sourcing Copilot is a Chrome side panel extension for recruiters. Open any LinkedIn or GitHub profile and get a structured candidate assessment in seconds — scored against your own ICP criteria with weighted dimensions, strengths, gaps, red flags, and a recommendation.
 
 **Core features:**
 
@@ -130,12 +130,6 @@ Each section has a **Copy** button. **Copy All** produces a single formatted blo
 - **Strengths** — confirmed evidence only. Things the candidate has explicitly stated.
 - **Gaps** — ICP requirements not evidenced in the profile.
 - **Worth Exploring** — contextual signals from employer background that suggest possible relevance but are not confirmed. Flagged as questions to probe, never scored as confirmed evidence.
-
----
-
-## Design principle
-
-Scores are a starting point for recruiter judgement, not a substitute for it. The tool surfaces evidence and flags gaps — it does not auto-filter, auto-reject, or auto-rank candidates out of a process. Every score is meant to be read, weighed, and overridden where the recruiter sees fit.
 
 ---
 

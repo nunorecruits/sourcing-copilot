@@ -360,6 +360,28 @@
       font-family: var(--sans);
       font-weight: 500;
     }
+    .company-overview-label { font-size: 9px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; color: var(--text-dim); font-family: var(--mono); margin: 8px 0 4px; }
+    .tech-stack-row { display: flex; flex-direction: column; gap: 5px; margin: 6px 0 4px; }
+    .tech-stack-label { font-size: 9px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; color: var(--text-dim); font-family: var(--mono); }
+    .tech-chips { display: flex; flex-wrap: wrap; gap: 4px; }
+    .tech-chip {
+      padding: 2px 7px;
+      background: rgba(13,148,136,0.08);
+      border: 1px solid rgba(13,148,136,0.25);
+      border-radius: 10px;
+      font-size: 10px; color: var(--accent);
+      font-family: var(--mono);
+      font-weight: 600;
+    }
+    .customer-chip {
+      padding: 2px 7px;
+      background: rgba(99,102,241,0.08);
+      border: 1px solid rgba(99,102,241,0.25);
+      border-radius: 10px;
+      font-size: 10px; color: #818cf8;
+      font-family: var(--sans);
+      font-weight: 500;
+    }
     .result-reasoning {
       margin-top: 8px; padding: 8px 10px;
       background: var(--surface2);
@@ -403,6 +425,26 @@
       font-family: var(--sans);
       margin-bottom: 5px;
     }
+    .tldr-section {
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-left: 3px solid var(--accent);
+      border-radius: 0 6px 6px 0;
+      padding: 8px 10px;
+      margin-bottom: 4px;
+    }
+    .tldr-label {
+      display: flex; align-items: center; justify-content: space-between;
+      margin-bottom: 4px;
+    }
+    .tldr-text { font-size: 12px; color: var(--text); line-height: 1.5; }
+    .tldr-copy-btn {
+      font-size: 10px; font-weight: 600; color: var(--text-dim);
+      background: var(--surface2); border: 1px solid var(--border);
+      border-radius: 4px; padding: 2px 7px; cursor: pointer;
+      transition: all 0.15s;
+    }
+    .tldr-copy-btn:hover { color: var(--accent); border-color: var(--accent); }
     .profile-list { list-style: none; padding: 0; display: flex; flex-direction: column; gap: 3px; }
     .profile-list li {
       font-size: 12px; color: var(--text);
