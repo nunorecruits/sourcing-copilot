@@ -3,7 +3,7 @@
 **AI-assisted profile scoring, GitHub technical analysis, shortlist building, and outreach. All inside your browser.**
 
 [![Chrome Web Store](https://img.shields.io/badge/Chrome%20Web%20Store-Install-teal)](https://chromewebstore.google.com/detail/ffgaljblcpgcamndlegkbbbebnhkjini)
-![Version](https://img.shields.io/badge/version-3.0.4-blue)
+![Version](https://img.shields.io/badge/version-3.0.5-blue)
 
 ---
 
@@ -184,6 +184,11 @@ No build step required — pure HTML, CSS, and vanilla JS.
 ---
 
 ## Changelog
+
+### v3.0.5
+- **TL;DR recommendation** — one-line, copy-ready summary of the scoring verdict surfaced at the top of every result
+- **Company tech stack** — confirmed tools, languages, and platforms an employer uses, shown as chips in Company Overview
+- **Customer industries** — sectors a B2B/B2B+B2C/PLG employer sells into, shown as chips in Company Overview
 
 ### v3.0.4
 - **Model updates** — Gemini updated to 3.5 Flash, OpenAI updated to GPT-5.4 mini
