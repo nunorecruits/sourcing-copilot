@@ -18,7 +18,8 @@ Sourcing Copilot is a Chrome side panel extension for recruiters. Open any Linke
 - **GitHub Technical Analysis** — scan any GitHub profile for language breakdown (by byte count across all public repos), notable projects, technical summary, outreach hook, and a Suitability Fit Signal against your active role.
 - **JD upload** — upload a job description PDF to automatically extract role name, ICP criteria, and weighted dimensions in one pass.
 - **Outreach drafting** — generate personalised connection requests and InMails anchored to the most ICP-relevant evidence from the scorecard. Mirrors your tone sample.
-- **Company analysis** — scan employers from a profile and analyse each one for ICP fit, size, stage, and industry.
+- **TL;DR recommendation** — a one-line, copy-ready summary of the scoring verdict surfaced at the top of every result.
+- **Company analysis** — scan employers from a profile and analyse each one for ICP fit, size, stage, and industry, with confirmed tech stack and customer industries called out as chips.
 - **Candidate shortlist** — save and compare scored candidates by role. Filter by source (LinkedIn / GitHub). Export to CSV.
 - **Worth Exploring** — contextual signals flagged separately from confirmed evidence, so you know what to probe in a screening call.
 - **Works with Gemini, OpenAI, and Anthropic** — bring your own API key.
