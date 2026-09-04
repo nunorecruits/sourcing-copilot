@@ -3,7 +3,7 @@
 **AI-assisted profile scoring, GitHub technical analysis, shortlist building, and outreach. All inside your browser.**
 
 [![Chrome Web Store](https://img.shields.io/badge/Chrome%20Web%20Store-Install-teal)](https://chromewebstore.google.com/detail/ffgaljblcpgcamndlegkbbbebnhkjini)
-![Version](https://img.shields.io/badge/version-3.0.5-blue)
+![Version](https://img.shields.io/badge/version-3.0.6-blue)
 
 ---
 
@@ -88,12 +88,10 @@ Or load unpacked from source — see [Development setup](#development-setup) bel
 GitHub limits unauthenticated API requests to 60/hour (~2-3 profiles). A free Personal Access Token raises this to 5,000/hour (~230 profiles).
 
 **Setup (one time, ~2 minutes):**
-1. Open the **GitHub** tab in the side panel
-2. Follow the 3-step setup card that appears
-3. Click **Open GitHub Token Page ↗**
-4. Click **Generate new token (classic)** — leave every scope box **unticked**, then click **Generate token**
-5. Copy the token shown on screen **(it only appears once)** and paste it into the extension
-6. Click **Save & Continue**
+1. Go to [github.com/settings/tokens/new](https://github.com/settings/tokens/new)
+2. Click **Generate new token (classic)** — leave every scope box **unticked**, then click **Generate token**
+3. Copy the token shown on screen **(it only appears once)**
+4. Open the **Settings** tab in the side panel, paste it into the **GitHub Token** field, and click **Save**
 
 Your token is stored locally in your browser only. It is never sent anywhere except GitHub's API.
 
@@ -184,6 +182,10 @@ No build step required — pure HTML, CSS, and vanilla JS.
 ---
 
 ## Changelog
+
+### v3.0.6
+- **GitHub token moved to Settings** — paste and save your Personal Access Token directly in the Settings tab instead of a separate first-run flow
+- **More reliable employer extraction** — LinkedIn employers are now read directly from the profile's Experience section in the DOM instead of relying on the AI model, cutting misses and false positives
 
 ### v3.0.5
 - **TL;DR recommendation** — one-line, copy-ready summary of the scoring verdict surfaced at the top of every result

@@ -361,7 +361,7 @@ async function autoScanCurrentTab(manual = false) {
     document.getElementById('detectedSection').style.display = 'none';
     document.getElementById('clearBtn').style.display = 'none';
     hideError();
-    extractCompanies(pageData.pageText, apiKey);
+    extractCompanies(pageData.pageText, apiKey, pageData.companies || []);
   } catch(err) {
     if (manual) showError('Could not read page: ' + err.message);
   }
@@ -654,21 +654,41 @@ function parseJSON(text) {
 }
 
 // --- Extract companies ---
-async function extractCompanies(pageText, apiKey) {
+async function extractCompanies(pageText, apiKey, domCompanies) {
   if (!pageText || !apiKey) return;
-  const prompt = `Extract ONLY the employer/company names from this LinkedIn profile's Experience section.
 
-Rules:
-- Return ONLY companies where this person was an employee or contractor
-- Ignore companies mentioned in posts, shares, recommendations, or "People also viewed"
-- Ignore education institutions
-- Ignore company names that appear in the sidebar or activity feed
-- Return a JSON array of strings, max 12 items
-- Return [] if none found
+  // If DOM extraction already found companies, use them directly -- no model call needed
+  if (domCompanies && domCompanies.length > 0) {
+    domCompanies.forEach(c => companies.add(c));
+    renderCompanyTags();
+    document.getElementById('detectedSection').style.display = 'block';
+    document.getElementById('clearBtn').style.display = 'block';
+    updateAnalyseSection();
+    return;
+  }
+
+  // Fallback: model-based extraction from EXPERIENCE section only
+  let experienceText = '';
+  const expMatch = pageText.match(/---\s*EXPERIENCE\s*---\s*([\s\S]*?)(?=\n---\s*[A-Z]|\n*$)/i);
+  if (expMatch && expMatch[1].trim().length > 50) {
+    experienceText = expMatch[1].trim().substring(0, 8000);
+  } else {
+    experienceText = pageText.substring(0, 8000);
+  }
+
+  const prompt = `Extract ONLY employer names from this candidate's Experience section.
+
+STRICT RULES:
+- Include ONLY companies where this person held a paid role (employee, contractor, founder, freelancer)
+- Experience entries look like: [Job Title] at [Company] or [Company] with dates
+- EXCLUDE: education institutions, volunteer organisations, clients, or partners
+- EXCLUDE: companies mentioned only in project descriptions or recommendations
+- If uncertain whether a company is an employer — exclude it
+- Return a JSON array of strings, max 12 items, [] if none found
 - No markdown, no explanation, just the raw JSON array
 
-Profile text:
-${pageText.substring(0, 5000)}`;
+Experience section:
+${experienceText}`;
 
   try {
     const text = await callAI(apiKey, prompt, 0, MODEL_SCORE);
@@ -698,7 +718,7 @@ async function scanCompanies() {
       currentCandidate.pageText = pageData.pageText;
       document.getElementById('candidateName').textContent = pageData.candidateName;
     }
-    await extractCompanies(pageData.pageText, apiKey);
+    await extractCompanies(pageData.pageText, apiKey, pageData.companies || []);
     if (companies.size === 0) showError('No companies detected. Add them manually.');
   } catch(err) { showError('Scan failed: ' + err.message); }
   btn.disabled = false; btn.innerHTML = '&#x1F50D; Scan Companies';
@@ -1383,28 +1403,7 @@ function setupGitHubTab() {
   document.getElementById('githubScanBtn').addEventListener('click', runGitHubAnalysis);
   document.getElementById('githubRescanBtn').addEventListener('click', runGitHubAnalysis);
 
-  document.getElementById('githubTokenSaveBtn').addEventListener('click', function() {
-    const val = (document.getElementById('githubTokenInput').value || '').trim();
-    const errEl = document.getElementById('githubTokenError');
-    if (!val || !val.startsWith('ghp_')) {
-      errEl.textContent = 'Token looks invalid — it should start with ghp_';
-      errEl.style.display = 'block';
-      return;
-    }
-    errEl.style.display = 'none';
-    githubToken = val;
-    chrome.storage.local.set({ githubToken: val }, function() {
-      document.getElementById('githubSetup').style.display = 'none';
-      // Now show scan prompt or placeholder depending on current tab
-      chrome.tabs.query({ active: true, currentWindow: true }).then(([t]) => {
-        if (t?.url && /https:\/\/github\.com\/[^/]+\/?([?#].*)?$/.test(t.url)) {
-          document.getElementById('githubPlaceholder').style.display = 'none';
-        } else {
-          document.getElementById('githubPlaceholder').style.display = 'flex';
-        }
-      });
-    });
-  });
+;
 
   document.getElementById('copyLanguagesBtn').addEventListener('click', function() {
     if (!githubData) return;
@@ -2541,7 +2540,11 @@ function saveSettings() {
   toneSample = document.getElementById('toneSampleInput').value.trim();
   recruiterRoleTitle = document.getElementById('recruiterRoleTitleInput').value.trim();
   recruiterCompanyName = document.getElementById('recruiterCompanyNameInput').value.trim();
-  chrome.storage.local.set({ apiKey, aiProvider, roles, activeRoleId, toneSample, recruiterRoleTitle, recruiterCompanyName }, function() {
+  const newGithubToken = (document.getElementById('githubTokenInput')?.value || '').trim();
+  if (newGithubToken) {
+    githubToken = newGithubToken;
+  }
+  chrome.storage.local.set({ apiKey, aiProvider, githubToken: newGithubToken || githubToken, roles, activeRoleId, toneSample, recruiterRoleTitle, recruiterCompanyName }, function() {
     showStatus('Settings saved.');
     updateSettingsConfirmationUI(apiKey, recruiterRoleTitle, recruiterCompanyName);
   });

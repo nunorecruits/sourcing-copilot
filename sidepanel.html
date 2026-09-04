@@ -1244,30 +1244,14 @@
 
       <!-- First-run: no token saved yet -->
       <div id="githubSetup" style="display:none;">
-        <div style="font-size:13px;font-weight:700;color:var(--text);margin-bottom:6px;">One-time setup</div>
-        <div style="font-size:11px;color:var(--text-muted);line-height:1.6;margin-bottom:12px;">
-          GitHub limits unauthenticated scans to ~2 profiles/hour. A free Personal Access Token removes that cap entirely (5,000/hour).<br><br>
-          Takes 2 minutes. No special permissions needed.
+        <div style="background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:12px 14px;">
+          <div style="font-size:12px;font-weight:700;color:var(--text);margin-bottom:6px;">GitHub token required</div>
+          <div style="font-size:11px;color:var(--text-muted);line-height:1.6;">
+            To scan GitHub profiles, add your GitHub Personal Access Token in <strong>Settings</strong>.<br><br>
+            Go to <a href="https://github.com/settings/tokens/new" target="_blank" style="color:var(--accent);">github.com/settings/tokens</a>, click <strong>Generate new token (classic)</strong>, leave all scope boxes unticked, generate, copy and paste into the GitHub Token field in Settings.
+          </div>
+          <button class="btn-secondary" style="margin-top:10px;width:100%;" onclick="document.querySelector('.tab[data-tab=settings]').click()">Go to Settings →</button>
         </div>
-        <div style="display:flex;flex-direction:column;gap:8px;margin-bottom:12px;">
-          <div style="display:flex;align-items:center;gap:8px;font-size:11px;color:var(--text-muted);">
-            <span style="background:var(--accent);color:#fff;border-radius:50%;width:18px;height:18px;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;flex-shrink:0;">1</span>
-            <span>Click the button below — it opens the GitHub token page directly</span>
-          </div>
-          <div style="display:flex;align-items:center;gap:8px;font-size:11px;color:var(--text-muted);">
-            <span style="background:var(--accent);color:#fff;border-radius:50%;width:18px;height:18px;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;flex-shrink:0;">2</span>
-            <span>Click <strong>Generate new token (classic)</strong> — leave every scope box <strong>unticked</strong>, then click <strong>Generate token</strong></span>
-          </div>
-          <div style="display:flex;align-items:center;gap:8px;font-size:11px;color:var(--text-muted);">
-            <span style="background:var(--accent);color:#fff;border-radius:50%;width:18px;height:18px;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;flex-shrink:0;">3</span>
-            <span>Copy the token shown on screen <strong>(it only appears once)</strong> and paste it below</span>
-          </div>
-        </div>
-        <a href="https://github.com/settings/tokens/new" target="_blank" class="btn-primary" style="display:block;text-align:center;text-decoration:none;margin-bottom:10px;">Open GitHub Token Page ↗</a>
-        <input type="password" class="input" id="githubTokenInput" placeholder="Paste token here (ghp_...)" style="margin-bottom:6px;" />
-        <button class="btn-primary" id="githubTokenSaveBtn">Save &amp; Continue</button>
-        <div style="font-size:9px;color:var(--text-dim);margin-top:6px;">Stored locally in your browser only. Never sent anywhere except GitHub's API.</div>
-        <div id="githubTokenError" class="error-msg" style="display:none;margin-top:6px;"></div>
       </div>
 
       <!-- Placeholder: not on a GitHub profile -->
@@ -1498,6 +1482,16 @@
         <div style="margin-top:8px;">
           <button class="save-btn" id="saveApiKeyBtn">Save API Key</button>
           <div id="apiKeySavedNote" style="font-size:11px;color:#ef4444;margin-top:5px;font-weight:500;">⚠ Save your API key before completing other settings.</div>
+        </div>
+      </div>
+
+      <div class="divider"></div>
+
+      <div class="settings-group">
+        <div class="settings-label">GitHub Token <span style="font-size:9px;opacity:0.6;font-weight:400;">(required for GitHub profile scanning)</span></div>
+        <input type="password" class="settings-input" id="githubTokenInput" placeholder="ghp_xxxxxxxxxxxxxxxxxxxx" />
+        <div style="font-size:9px;color:var(--text-dim);margin-top:3px;line-height:1.5;">
+          Raises GitHub API limit from 60 to 5,000 req/hour. Generate a free token at <a href="https://github.com/settings/tokens/new" target="_blank" style="color:var(--accent);">github.com/settings/tokens</a> — leave all scope boxes unticked, click Generate, copy and paste here.
         </div>
       </div>
 

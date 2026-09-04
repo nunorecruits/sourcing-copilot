@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "Sourcing Copilot",
-  "version": "3.0.5",
+  "version": "3.0.6",
   "description": "Score LinkedIn & GitHub profiles against your ICP. Weighted scoring, outreach drafting & company analysis. All inside your browser.",
   "permissions": [
     "activeTab",

@@ -237,6 +237,54 @@
     return extracted;
   }
 
+  function extractEmployersFromDOM() {
+    const employers = {};
+
+    // Only look for company links inside elements that LinkedIn uses for experience entries
+    // These selectors target the experience section specifically
+    const experienceSelectors = [
+      // Standard profile experience section
+      'section[data-section="experience"]',
+      'section#experience-section',
+      // Aria-labelled sections
+      'section[aria-label*="experience" i]',
+      'section[aria-label*="Experience" i]',
+      // pvs-list pattern used in newer LinkedIn UI
+      '.pvs-list__container',
+    ];
+
+    let experienceContainer = null;
+    for (const sel of experienceSelectors) {
+      const el = document.querySelector(sel);
+      if (el) { experienceContainer = el; break; }
+    }
+
+    // If we can't find a reliable experience container, return empty
+    // -- fall through to text-based extraction
+    if (!experienceContainer) return employers;
+
+    // Only extract company links from within the experience container
+    const companyAnchors = experienceContainer.querySelectorAll('a[href*="/company/"]');
+
+    companyAnchors.forEach(a => {
+      const href = a.href || '';
+      const companySlug = href.match(/linkedin\.com\/company\/([^/?#]+)/)?.[1];
+      if (!companySlug) return;
+
+      const name = (
+        a.getAttribute('aria-label') ||
+        a.querySelector('span[aria-hidden="true"]')?.textContent ||
+        a.textContent
+      ).trim().replace(/\s+/g, ' ');
+
+      if (name && name.length > 1 && name.length < 100) {
+        employers[name] = `https://www.linkedin.com/company/${companySlug}/`;
+      }
+    });
+
+    return employers;
+  }
+
   chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
     if (request.action === 'extractCompanies') {
       // Only handle on LinkedIn -- GitHub has its own listener
@@ -246,13 +294,17 @@
       const candidateName = getCandidateName();
       const isLinkedIn = window.location.hostname.includes('linkedin.com');
 
+      // Extract employers from DOM immediately -- this is more reliable than model extraction
+      const domEmployers = extractEmployersFromDOM();
+      const domCompanyNames = Object.keys(domEmployers);
+
       // Wrap everything in try/catch with a hard timeout fallback
       const hardTimeout = setTimeout(() => {
-        // If extractProfileText hangs, send whatever we can
         sendResponse({
           pageText: (document.querySelector('main') || document.body).innerText.trim().substring(0, 18000),
           pageTitle, candidateName, isLinkedIn, url,
-          companyLinks: {}, companies: []
+          companyLinks: domEmployers,
+          companies: domCompanyNames
         });
       }, 20000);
 
@@ -262,17 +314,18 @@
           sendResponse({
             pageText: pageText.substring(0, 18000),
             pageTitle, candidateName, isLinkedIn, url,
-            companyLinks: {}, companies: []
+            companyLinks: domEmployers,
+            companies: domCompanyNames
           });
         })
         .catch(() => {
           clearTimeout(hardTimeout);
-          // Fallback — send raw page text
           const fallback = (document.querySelector('main') || document.body).innerText.trim();
           sendResponse({
             pageText: fallback.substring(0, 18000),
             pageTitle, candidateName, isLinkedIn, url,
-            companyLinks: {}, companies: []
+            companyLinks: domEmployers,
+            companies: domCompanyNames
           });
         });
 
