@@ -38,7 +38,7 @@ This data never leaves your device except as described below.
 
 ## Data Sent to AI Providers
 
-When you score a profile, generate outreach, or upload a job description, Sourcing Copilot sends the following data directly from your browser to your chosen AI provider (Google Gemini or OpenAI) using your own API key:
+When you score a profile, generate outreach, or upload a job description, Sourcing Copilot sends the following data directly from your browser to your chosen AI provider (Google Gemini, OpenAI, Anthropic, or Mistral) using your own API key:
 
 - Extracted text from the LinkedIn or GitHub profile you are viewing
 - PDF content from LinkedIn profile exports or job description files you upload
@@ -49,6 +49,8 @@ This data is sent directly to the AI provider's API. It is subject to that provi
 
 - Google Gemini: https://policies.google.com/privacy
 - OpenAI: https://openai.com/privacy
+- Anthropic: https://www.anthropic.com/legal/privacy
+- Mistral: https://mistral.ai/terms#privacy-policy
 
 The developer of Sourcing Copilot does not receive, intercept or have access to this data.
 
@@ -100,6 +102,8 @@ Host permissions:
 - **github.com** — to inject content scripts on GitHub profile pages
 - **generativelanguage.googleapis.com** — to send requests to the Google Gemini API using your key
 - **api.openai.com** — to send requests to the OpenAI API using your key
+- **api.anthropic.com** — to send requests to the Anthropic API using your key
+- **api.mistral.ai** — to send requests to the Mistral API using your key
 
 No permission is used for any purpose other than the core functionality described above.
 

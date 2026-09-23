@@ -3,7 +3,7 @@
 **AI-assisted profile scoring, GitHub technical analysis, shortlist building, and outreach. All inside your browser.**
 
 [![Chrome Web Store](https://img.shields.io/badge/Chrome%20Web%20Store-Install-teal)](https://chromewebstore.google.com/detail/ffgaljblcpgcamndlegkbbbebnhkjini)
-![Version](https://img.shields.io/badge/version-3.0.6-blue)
+![Version](https://img.shields.io/badge/version-3.0.7-blue)
 
 ---
 
@@ -22,7 +22,7 @@ Sourcing Copilot is a Chrome side panel extension for recruiters. Open any Linke
 - **Company analysis** — scan employers from a profile and analyse each one for ICP fit, size, stage, and industry, with confirmed tech stack and customer industries called out as chips.
 - **Candidate shortlist** — save and compare scored candidates by role. Filter by source (LinkedIn / GitHub). Export to CSV.
 - **Worth Exploring** — contextual signals flagged separately from confirmed evidence, so you know what to probe in a screening call.
-- **Works with Gemini, OpenAI, and Anthropic** — bring your own API key.
+- **Works with Gemini, OpenAI, Anthropic, and Mistral** — bring your own API key.
 
 ---
 
@@ -47,6 +47,11 @@ Or load unpacked from source — see [Development setup](#development-setup) bel
 **Anthropic (paid):**
 1. Go to [console.anthropic.com/settings/keys](https://console.anthropic.com/settings/keys)
 2. Create a new API key (starts with `sk-ant-...`)
+
+**Mistral (free Experiment plan or paid Scale plan):**
+1. Go to [console.mistral.ai/api-keys](https://console.mistral.ai/api-keys)
+2. Create a new API key. New keys can take a few minutes to activate
+3. The free plan is limited to ~1 request/second. Check its data terms before scoring real candidate profiles
 
 ### 3. Configure your first role
 
@@ -173,7 +178,7 @@ No build step required — pure HTML, CSS, and vanilla JS.
 ## Privacy
 
 - All profile data is processed locally in your browser
-- Profile text is sent to your chosen AI provider (Gemini, OpenAI, or Anthropic) using your own API key
+- Profile text is sent to your chosen AI provider (Gemini, OpenAI, Anthropic, or Mistral) using your own API key
 - GitHub API requests are made directly from your browser using your own token
 - No data is sent to any Sourcing Copilot servers
 - No data is stored beyond your browser's local storage
@@ -182,6 +187,9 @@ No build step required — pure HTML, CSS, and vanilla JS.
 ---
 
 ## Changelog
+
+### v3.0.7
+- **Mistral AI provider** — Mistral Medium added as a fourth provider option, with EU hosting and a free Experiment plan. LinkedIn PDFs are read with Mistral OCR before scoring, and rate-limited requests retry automatically
 
 ### v3.0.6
 - **GitHub token moved to Settings** — paste and save your Personal Access Token directly in the Settings tab instead of a separate first-run flow
