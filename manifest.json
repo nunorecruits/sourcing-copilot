@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "Sourcing Copilot",
-  "version": "3.0.6",
+  "version": "3.0.7",
   "description": "Score LinkedIn & GitHub profiles against your ICP. Weighted scoring, outreach drafting & company analysis. All inside your browser.",
   "permissions": [
     "activeTab",
@@ -16,7 +16,8 @@
     "https://github.com/*",
     "https://generativelanguage.googleapis.com/*",
     "https://api.openai.com/*",
-    "https://api.anthropic.com/*"
+    "https://api.anthropic.com/*",
+    "https://api.mistral.ai/*"
   ],
   "background": {
     "service_worker": "background.js"

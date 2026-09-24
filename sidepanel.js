@@ -125,6 +125,7 @@ function setupEventListeners() {
     tab.addEventListener('click', function() { switchTab(tab.dataset.tab); });
   });
   wire('settingsTabBtn', 'click', function() { switchTab('settings'); });
+  wire('githubGoToSettingsBtn', 'click', function() { switchTab('settings'); });
   wire('scanBtn', 'click', scanCompanies);
   wire('scoreProfileBtn', 'click', scoreProfile);
   wire('pdfInput', 'change', handlePdfUpload);
@@ -388,6 +389,7 @@ function extractNameFromTitle(title) {
 async function callAI(apiKey, prompt, temperature = 0.2, model = MODEL_SCORE) {
   if (aiProvider === 'openai') return callOpenAI(apiKey, prompt, temperature);
   if (aiProvider === 'anthropic') return callAnthropic(apiKey, prompt, temperature);
+  if (aiProvider === 'mistral') return callMistral(apiKey, prompt, temperature);
   return callGemini(apiKey, prompt, temperature, model);
 }
 
@@ -466,6 +468,11 @@ async function callAnthropic(apiKey, prompt, temperature = 0.2) {
 }
 
 async function callPdfAI(apiKey, prompt, pdfBase64, filename, temperature = 0) {
+  if (aiProvider === 'mistral') {
+    // Mistral chat can't take an inline PDF, so extract text with Mistral OCR first
+    const pdfText = await mistralOcrPdf(apiKey, pdfBase64);
+    return callMistral(apiKey, `PROFILE PDF CONTENT (${filename || 'linkedin-profile.pdf'}):\n${pdfText}\n\n${prompt}`, temperature);
+  }
   if (aiProvider === 'anthropic') {
     const res = await fetch('https://api.anthropic.com/v1/messages', {
       method: 'POST',
@@ -563,31 +570,74 @@ async function callOpenAI(apiKey, prompt, temperature = 0.2) {
   return data.choices?.[0]?.message?.content || '';
 }
 
+const MISTRAL_MODEL = 'mistral-medium-latest';
+
+// Free tier allows ~1 request/second, so retry 429s with backoff before surfacing an error
+async function mistralFetch(path, apiKey, body) {
+  const delays = [1500, 3000, 6000];
+  for (let attempt = 0; ; attempt++) {
+    const res = await fetch(`https://api.mistral.ai/v1/${path}`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${apiKey}`
+      },
+      body: JSON.stringify(body)
+    });
+    if (res.ok) return res.json();
+    if (res.status === 429 && attempt < delays.length) {
+      await new Promise(r => setTimeout(r, delays[attempt]));
+      continue;
+    }
+    const err = await res.json().catch(() => ({}));
+    if (res.status === 429) {
+      throw new Error('Mistral rate limit reached. The free Experiment plan allows ~1 request/second — wait a moment or upgrade to Scale at console.mistral.ai.');
+    }
+    throw new Error(`Mistral API ${res.status}: ${err.message || err.error?.message || JSON.stringify(err)}`);
+  }
+}
+
+async function callMistral(apiKey, prompt, temperature = 0.2, maxTokens = 8000) {
+  const data = await mistralFetch('chat/completions', apiKey, {
+    model: MISTRAL_MODEL,
+    messages: [
+      { role: 'system', content: 'You are an expert recruiter assistant. Follow all instructions precisely. Return only valid JSON when asked — no markdown, no code fences, no explanation.' },
+      { role: 'user', content: prompt }
+    ],
+    temperature,
+    max_tokens: maxTokens
+  });
+  const content = data.choices?.[0]?.message?.content;
+  if (Array.isArray(content)) return content.filter(c => c.type === 'text').map(c => c.text).join('');
+  return content || '';
+}
+
+async function mistralOcrPdf(apiKey, pdfBase64) {
+  const data = await mistralFetch('ocr', apiKey, {
+    model: 'mistral-ocr-latest',
+    document: { type: 'document_url', document_url: `data:application/pdf;base64,${pdfBase64}` }
+  });
+  const text = (data.pages || []).map(p => p.markdown || '').join('\n\n').trim();
+  if (!text) throw new Error('Mistral OCR returned no text from the PDF.');
+  return text;
+}
+
 function updateApiKeyPlaceholder(provider) {
   const input = document.getElementById('apiKeyInput');
   const label = document.getElementById('apiKeyLabel');
-  const noteGemini = document.getElementById('apiKeyNoteGemini');
-  const noteOpenAI = document.getElementById('apiKeyNoteOpenAI');
-  const noteAnthropic = document.getElementById('apiKeyNoteAnthropic');
-  if (provider === 'openai') {
-    input.placeholder = 'sk-...';
-    label.textContent = 'OpenAI API Key';
-    if (noteGemini) noteGemini.style.display = 'none';
-    if (noteOpenAI) noteOpenAI.style.display = 'inline';
-    if (noteAnthropic) noteAnthropic.style.display = 'none';
-  } else if (provider === 'anthropic') {
-    input.placeholder = 'sk-ant-...';
-    label.textContent = 'Anthropic API Key';
-    if (noteGemini) noteGemini.style.display = 'none';
-    if (noteOpenAI) noteOpenAI.style.display = 'none';
-    if (noteAnthropic) noteAnthropic.style.display = 'inline';
-  } else {
-    input.placeholder = 'AIza...';
-    label.textContent = 'Gemini API Key';
-    if (noteGemini) noteGemini.style.display = 'inline';
-    if (noteOpenAI) noteOpenAI.style.display = 'none';
-    if (noteAnthropic) noteAnthropic.style.display = 'none';
-  }
+  const config = {
+    gemini: { placeholder: 'AIza...', label: 'Gemini API Key', note: 'apiKeyNoteGemini' },
+    openai: { placeholder: 'sk-...', label: 'OpenAI API Key', note: 'apiKeyNoteOpenAI' },
+    anthropic: { placeholder: 'sk-ant-...', label: 'Anthropic API Key', note: 'apiKeyNoteAnthropic' },
+    mistral: { placeholder: 'Mistral API key', label: 'Mistral API Key', note: 'apiKeyNoteMistral' }
+  };
+  const active = config[provider] || config.gemini;
+  input.placeholder = active.placeholder;
+  label.textContent = active.label;
+  Object.values(config).forEach(function(c) {
+    const note = document.getElementById(c.note);
+    if (note) note.style.display = c.note === active.note ? 'inline' : 'none';
+  });
 }
 
 function parseJSON(text) {
@@ -1164,6 +1214,8 @@ ${returnSchema}`;
       }
       const data = await res.json();
       aiResponse = data.choices?.[0]?.message?.content || '';
+    } else if (activeAiProvider === 'mistral') {
+      aiResponse = await callMistral(apiKey, modelPrompt, 0.3, 1200);
     } else if (activeAiProvider === 'anthropic') {
       const res = await fetch('https://api.anthropic.com/v1/messages', {
         method: 'POST',
