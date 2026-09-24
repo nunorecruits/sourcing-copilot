@@ -3,7 +3,7 @@
 **AI-assisted profile scoring, GitHub technical analysis, shortlist building, and outreach. All inside your browser.**
 
 [![Chrome Web Store](https://img.shields.io/badge/Chrome%20Web%20Store-Install-teal)](https://chromewebstore.google.com/detail/ffgaljblcpgcamndlegkbbbebnhkjini)
-![Version](https://img.shields.io/badge/version-3.0.7-blue)
+![Version](https://img.shields.io/badge/version-3.0.8-blue)
 
 ---
 
@@ -187,6 +187,9 @@ No build step required — pure HTML, CSS, and vanilla JS.
 ---
 
 ## Changelog
+
+### v3.0.8
+- **Clearer assessment disclaimers** — GitHub and LinkedIn results now share one consistent notice: AI-assisted assessment, the data source it is based on, and that human review and further assessment are required before making decisions
 
 ### v3.0.7
 - **Mistral AI provider** — Mistral Medium added as a fourth provider option. LinkedIn PDFs are read with Mistral OCR before scoring, and rate-limited requests on the free plan retry automatically

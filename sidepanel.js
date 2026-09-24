@@ -1471,7 +1471,7 @@ function setupGitHubTab() {
       fitTier,
       ...fitReasons.map(r => '· ' + r),
       '',
-      '⚠ Based on public GitHub data only — technical signals only. Career history, domain experience, and soft skills require LinkedIn or interview assessment.'
+      'ⓘ AI-assisted assessment based on public GitHub data only. Human review and further assessment required before making decisions.'
     ].join('\n');
     copyToClipboard(text, this);
   });
@@ -1504,7 +1504,7 @@ function setupGitHubTab() {
       '— SUITABILITY FIT SIGNAL' + (fitRoleName ? ' — ' + fitRoleName : '') + ' —',
       fitTier,
       ...fitReasons.map(r => '· ' + r),
-      '⚠ Based on public GitHub data only — technical signals only.',
+      'ⓘ AI-assisted assessment based on public GitHub data only. Human review and further assessment required before making decisions.',
     ] : [];
     const text = [
       `GITHUB TECHNICAL PROFILE — ${name}`,
@@ -2084,7 +2084,7 @@ function renderResults() {
       : 'Score is a holistic AI judgment across ICP dimensions. Define weighted dimensions in role settings for a fully transparent, consistent score.';
 
     html += '<div style="font-size:10px;color:var(--text-muted);padding:6px 8px;background:var(--surface2);border:1px solid var(--border);border-radius:6px;margin-bottom:8px;line-height:1.5;">'
-      + '&#9432; AI-assisted assessment — review for accuracy before making decisions.'
+      + '&#9432; AI-assisted assessment based on LinkedIn profile data only. Human review and further assessment required before making decisions.'
       + '</div>'
       + '<div class="result-card candidate-card">'
       + '<div class="candidate-card-header">'
